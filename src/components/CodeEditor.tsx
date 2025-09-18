@@ -1,7 +1,6 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { Editor } from '@monaco-editor/react'
-import { motion } from 'framer-motion'
-import { Settings, Play, Pause, RotateCcw } from 'lucide-react'
+import { Play, Pause, RotateCcw } from 'lucide-react'
 
 interface CodeEditorProps {
   code: string

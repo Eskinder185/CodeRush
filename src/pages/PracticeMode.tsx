@@ -23,11 +23,9 @@ const PracticeMode = () => {
   const [isPaused, setIsPaused] = useState(false)
   const [accuracy, setAccuracy] = useState(100)
   const [wpm, setWpm] = useState(0)
-  const [mistakes, setMistakes] = useState(0)
   const [showSettings, setShowSettings] = useState(false)
   const [currentSnippet, setCurrentSnippet] = useState('')
   const [editorTheme, setEditorTheme] = useState('vs-dark')
-  const [useMonaco, setUseMonaco] = useState(true)
 
   const [settings, setSettings] = useState<PracticeSettings>({
     testLength: 'medium',
@@ -168,7 +166,7 @@ class Circle implements Drawable {
   }, [language, settings.testLength])
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
+    let interval: number | null = null
     
     if (isTyping && !isPaused) {
       interval = setInterval(() => {
@@ -207,12 +205,8 @@ class Circle implements Drawable {
   const handleStatsUpdate = (stats: { wpm: number; accuracy: number; mistakes: number }) => {
     setWpm(stats.wpm)
     setAccuracy(stats.accuracy)
-    setMistakes(stats.mistakes)
   }
 
-  const handleEditorError = () => {
-    setUseMonaco(false)
-  }
 
   const resetPractice = () => {
     setUserInput('')
@@ -221,7 +215,6 @@ class Circle implements Drawable {
     setIsPaused(false)
     setAccuracy(100)
     setWpm(0)
-    setMistakes(0)
   }
 
   const togglePause = () => {

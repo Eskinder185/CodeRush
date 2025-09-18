@@ -1,5 +1,7 @@
 import { UserStats } from '../data/lessons'
 
+export type { UserStats }
+
 const STATS_KEY = 'coderush_user_stats'
 
 export interface LanguageProgress {

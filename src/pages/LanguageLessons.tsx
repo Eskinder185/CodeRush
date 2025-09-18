@@ -168,7 +168,7 @@ const LanguageLessons = () => {
           className="grid gap-6"
           variants={containerVariants}
         >
-          {filteredLessons.map((lesson, index) => (
+          {filteredLessons.map((lesson) => (
             <motion.div
               key={lesson.id}
               className="card group hover:scale-[1.02] transition-all duration-300"

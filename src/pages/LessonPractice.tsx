@@ -21,9 +21,7 @@ const LessonPractice = () => {
   const [mistakes, setMistakes] = useState(0)
   const [symbolsMissed, setSymbolsMissed] = useState<string[]>([])
   const [isCompleted, setIsCompleted] = useState(false)
-  const [showResults, setShowResults] = useState(false)
   const [editorTheme, setEditorTheme] = useState('vs-dark')
-  const [useMonaco, setUseMonaco] = useState(true)
 
   const lesson = getLesson(language || '', lessonId || '')
   
@@ -42,7 +40,7 @@ const LessonPractice = () => {
   }
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
+    let interval: number | null = null
     
     if (isTyping && !isPaused) {
       interval = setInterval(() => {
@@ -65,7 +63,6 @@ const LessonPractice = () => {
     if (isComplete) {
       setIsTyping(false)
       setIsCompleted(true)
-      setShowResults(true)
       saveLessonStats()
     }
   }
@@ -77,8 +74,8 @@ const LessonPractice = () => {
       wpm,
       accuracy,
       mistakes,
-      timeElapsed,
-      completedAt: new Date().toISOString(),
+      timeSpent: timeElapsed,
+      completedAt: new Date(),
       symbolsMissed
     }
     saveStats(stats)
@@ -90,9 +87,6 @@ const LessonPractice = () => {
     setMistakes(stats.mistakes)
   }
 
-  const handleEditorError = () => {
-    setUseMonaco(false)
-  }
 
   const resetPractice = () => {
     setUserInput('')
@@ -104,7 +98,6 @@ const LessonPractice = () => {
     setMistakes(0)
     setSymbolsMissed([])
     setIsCompleted(false)
-    setShowResults(false)
   }
 
   const togglePause = () => {

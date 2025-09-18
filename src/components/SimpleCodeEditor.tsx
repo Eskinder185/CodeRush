@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
@@ -26,7 +25,6 @@ const SimpleCodeEditor = ({
   onPauseToggle,
   onReset,
   readOnly = false,
-  theme = 'vs-dark',
   showLineNumbers = true,
   showStatusBar = true
 }: SimpleCodeEditorProps) => {
@@ -108,9 +106,6 @@ const SimpleCodeEditor = ({
     return languageMap[lang] || lang.toUpperCase()
   }
 
-  const getProgressPercentage = () => {
-    return Math.round((userInput.length / code.length) * 100)
-  }
 
   return (
     <div className="relative">

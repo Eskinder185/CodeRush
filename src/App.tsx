@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Languages from './pages/Languages'

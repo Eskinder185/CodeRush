@@ -270,7 +270,7 @@ func (us *UserService) GetAllUsers() []User {
   const codeSnippet = codeSnippets[currentLanguage] || codeSnippets.python
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    let interval: number
     if (isTyping) {
       interval = setInterval(() => {
         setTimeElapsed(prev => prev + 1)

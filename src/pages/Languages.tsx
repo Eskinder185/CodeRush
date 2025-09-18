@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Search, Code, FileText, Database, Terminal, Globe, Cpu, Hash, Brackets } from 'lucide-react'
+import { Search, Code, Database, Terminal, Cpu, Hash, Brackets } from 'lucide-react'
 
 interface Language {
   id: string

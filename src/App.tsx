@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
+import { useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Languages from './pages/Languages'
@@ -14,6 +15,17 @@ import ParticleBackground from './components/ParticleBackground'
 import ErrorBoundary from './components/ErrorBoundary'
 
 function App() {
+  // Handle GitHub Pages redirect
+  useEffect(() => {
+    const pathSegmentsToKeep = 0;
+    const l = window.location;
+    if (l.pathname.includes('/CodeRush/') && l.search.includes('?/')) {
+      const p = l.search.slice(l.search.indexOf('?/') + 2);
+      l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + 
+        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/' + 
+        p.replace(/~and~/g, '&') + l.hash);
+    }
+  }, []);
   return (
     <ErrorBoundary>
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

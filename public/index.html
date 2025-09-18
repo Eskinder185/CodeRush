@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeRush - Professional Coding Practice Platform</title>
+    <meta name="description" content="Master programming languages with CodeRush - a professional coding practice platform with structured lessons, free practice mode, and real-time progress tracking.">
+    <link rel="icon" type="image/svg+xml" href="/CodeRush/vite.svg" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            color: white;
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .loading {
+            text-align: center;
+        }
+        .spinner {
+            border: 2px solid #333;
+            border-top: 2px solid #00d4ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <div class="spinner"></div>
+        <h1>CodeRush</h1>
+        <p>Loading your coding practice platform...</p>
+    </div>
+    <script>
+        // Redirect to the main application
+        window.location.href = '/CodeRush/';
+    </script>
+</body>
+</html>

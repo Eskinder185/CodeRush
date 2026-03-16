@@ -28,13 +28,14 @@ function App() {
   }, []);
   return (
     <ErrorBoundary>
-      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <Router basename={import.meta.env.PROD ? '/CodeRush' : '/'} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <div className="min-h-screen bg-dark-bg">
           <ParticleBackground />
           <Navbar />
           <AnimatePresence mode="wait">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="" element={<Home />} />
               <Route path="/languages" element={<Languages />} />
               <Route path="/languages/:language/lessons" element={<LanguageLessons />} />
               <Route path="/languages/:language/lesson/:lessonId" element={<LessonPractice />} />

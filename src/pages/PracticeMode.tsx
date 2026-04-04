@@ -33,9 +33,11 @@ const PracticeMode = () => {
   const text = getLessonText()
 
   return (
-    <div className="p-6">
+    <div className="page-shell">
+      <div className="page-inner max-w-3xl">
       {/* show 3 lines, forgiving comparison */}
       <InteractiveLineTyper text={text} windowSize={3} strict={false} />
+      </div>
     </div>
   )
 }

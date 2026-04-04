@@ -142,24 +142,24 @@ export default function InteractiveLineTyper({
       aria-label="Interactive line-by-line typing area"
     >
       <header className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold">Line Practice (window {windowLines.length} lines)</h2>
-        <div className="text-sm text-gray-600">
-          <kbd className="px-1 py-0.5 border rounded">Enter</kbd> next
+        <h2 className="text-lg font-semibold text-ink">Line Practice (window {windowLines.length} lines)</h2>
+        <div className="text-sm text-ink-subtle">
+          <kbd className="rounded border border-dark-border bg-dark-card px-1.5 py-0.5 text-xs text-ink-muted">Enter</kbd> next
           <span className="mx-2">•</span>
-          <kbd className="px-1 py-0.5 border rounded">Tab</kbd> restart line
+          <kbd className="rounded border border-dark-border bg-dark-card px-1.5 py-0.5 text-xs text-ink-muted">Tab</kbd> restart line
           <span className="mx-2">•</span>
-          <kbd className="px-1 py-0.5 border rounded">Backspace</kbd> delete
+          <kbd className="rounded border border-dark-border bg-dark-card px-1.5 py-0.5 text-xs text-ink-muted">Backspace</kbd> delete
         </div>
       </header>
 
-      <div className="rounded-2xl ring-1 ring-gray-200 bg-white p-4 max-h-[70vh] overflow-auto">
+      <div className="max-h-[70vh] overflow-auto rounded-card border border-dark-border bg-dark-surface p-4 shadow-card">
         {windowLines.map((line, idx) => {
           const absoluteIdx = start + idx;
           const isCurrent = absoluteIdx === lineIndex && !done;
 
           if (!isCurrent) {
             return (
-              <LineRow key={absoluteIdx} number={absoluteIdx + 1} className="text-gray-500">
+              <LineRow key={absoluteIdx} number={absoluteIdx + 1} className="text-ink-subtle">
                 <span className="whitespace-pre font-mono">{line || " "}</span>
               </LineRow>
             );
@@ -170,14 +170,14 @@ export default function InteractiveLineTyper({
             <LineRow
               key={absoluteIdx}
               number={absoluteIdx + 1}
-              className="bg-yellow-50 ring-1 ring-yellow-200"
+              className="bg-neon-blue/5 ring-1 ring-neon-blue/25"
               innerRef={currentRef}
             >
               <span className="whitespace-pre font-mono">
                 {target.split("").map((ch, i) => {
                   const state = decorations[i] ?? "pending";
                   const cls =
-                    state === "pending" ? "text-gray-400"
+                    state === "pending" ? "text-ink-faint"
                     : state === "ok" ? "text-green-600"
                     : "text-red-600 underline decoration-red-600";
                   return <span key={i} className={cls}>{ch}</span>;
@@ -189,7 +189,7 @@ export default function InteractiveLineTyper({
                   </span>
                 }
                 {/* caret */}
-                <span className="inline-block w-0.5 h-5 align-text-bottom bg-black animate-pulse" />
+                <span className="inline-block h-5 w-0.5 animate-pulse bg-neon-blue align-text-bottom" />
               </span>
             </LineRow>
           );
@@ -197,8 +197,8 @@ export default function InteractiveLineTyper({
       </div>
 
       {done && (
-        <div className="mt-4 rounded-xl p-3 bg-emerald-50 ring-1 ring-emerald-200">
-          <div className="font-medium">Exercise complete. Press Tab to restart a line or refresh to start over.</div>
+        <div className="mt-4 rounded-card border border-emerald-500/30 bg-emerald-500/10 p-3">
+          <div className="font-medium text-ink-muted">Exercise complete. Press Tab to restart a line or refresh to start over.</div>
         </div>
       )}
     </div>
@@ -221,7 +221,7 @@ function LineRow({
       ref={innerRef}
       className={"flex items-start gap-3 px-3 py-1 rounded-md " + className}
     >
-      <div className="w-10 text-right pr-2 select-none text-gray-400">{number}</div>
+      <div className="w-10 select-none pr-2 text-right text-ink-faint">{number}</div>
       <div className="flex-1">{children}</div>
     </div>
   );

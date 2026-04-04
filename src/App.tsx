@@ -12,6 +12,7 @@ import About from './pages/About'
 import FAQ from './pages/FAQ'
 import NotFound from './pages/NotFound'
 import ParticleBackground from './components/ParticleBackground'
+import SiteFooter from './components/SiteFooter'
 import ErrorBoundary from './components/ErrorBoundary'
 
 function App() {
@@ -29,23 +30,26 @@ function App() {
   return (
     <ErrorBoundary>
       <Router basename={import.meta.env.PROD ? '/CodeRush' : '/'} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <div className="min-h-screen bg-dark-bg">
+        <div className="flex min-h-screen flex-col bg-dark-bg text-ink">
           <ParticleBackground />
           <Navbar />
-          <AnimatePresence mode="wait">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="" element={<Home />} />
-              <Route path="/languages" element={<Languages />} />
-              <Route path="/languages/:language/lessons" element={<LanguageLessons />} />
-              <Route path="/languages/:language/lesson/:lessonId" element={<LessonPractice />} />
-              <Route path="/languages/:language/practice" element={<PracticeMode />} />
-              <Route path="/stats" element={<Stats />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AnimatePresence>
+          <div className="flex min-h-0 flex-1 flex-col">
+            <AnimatePresence mode="wait">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="" element={<Home />} />
+                <Route path="/languages" element={<Languages />} />
+                <Route path="/languages/:language/lessons" element={<LanguageLessons />} />
+                <Route path="/languages/:language/lesson/:lessonId" element={<LessonPractice />} />
+                <Route path="/languages/:language/practice" element={<PracticeMode />} />
+                <Route path="/stats" element={<Stats />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AnimatePresence>
+          </div>
+          <SiteFooter />
         </div>
       </Router>
     </ErrorBoundary>

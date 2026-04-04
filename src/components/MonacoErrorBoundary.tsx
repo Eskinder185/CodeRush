@@ -35,7 +35,7 @@ class MonacoErrorBoundary extends Component<Props, State> {
                 <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               </div>
-              <span className="text-sm text-gray-400 font-mono">
+              <span className="text-sm text-ink-subtle font-mono">
                 Code Editor (Fallback Mode)
               </span>
             </div>

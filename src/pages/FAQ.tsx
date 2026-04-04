@@ -84,56 +84,56 @@ const FAQ = () => {
 
   return (
     <motion.div
-      className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8"
+      className="page-shell"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="page-inner-narrow">
         {/* Header */}
         <motion.div
-          className="text-center mb-16"
+          className="section-head max-w-3xl md:mx-auto"
           variants={itemVariants}
         >
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <h1 className="heading-page mb-0 px-2">
             Frequently Asked <span className="text-gradient">Questions</span>
           </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <div className="section-rule" aria-hidden />
+          <p className="body-lead mx-auto mt-5 max-w-2xl text-ink-subtle md:mt-6">
             Everything you need to know about CodeRush and how to get the most out of your coding practice.
           </p>
         </motion.div>
 
         {/* FAQ Items */}
         <motion.div
-          className="space-y-4"
+          className="space-y-3 sm:space-y-4"
           variants={itemVariants}
         >
           {faqData.map((item) => (
             <motion.div
               key={item.id}
-              className="card overflow-hidden"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
+              className="accordion-card"
             >
               <button
+                type="button"
                 onClick={() => toggleItem(item.id)}
-                className="w-full text-left p-6 focus:outline-none focus:ring-2 focus:ring-neon-blue focus:ring-opacity-50 rounded-lg"
+                className="focus-ring w-full px-5 py-5 text-left sm:px-6 sm:py-5"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="text-neon-blue">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 flex-1 items-start gap-4">
+                    <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-neon-blue/25 bg-neon-blue/[0.08] text-neon-blue [&_svg]:h-5 [&_svg]:w-5">
                       {item.icon}
                     </div>
-                    <h3 className="text-xl font-semibold text-white">
+                    <h3 className="text-lg font-semibold leading-snug tracking-tight text-ink sm:text-xl">
                       {item.question}
                     </h3>
                   </div>
                   <motion.div
                     animate={{ rotate: openItems.includes(item.id) ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="text-gray-400"
+                    transition={{ duration: 0.25 }}
+                    className="mt-1 shrink-0 text-ink-subtle"
                   >
-                    <ChevronDown className="w-6 h-6" />
+                    <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6" />
                   </motion.div>
                 </div>
               </button>
@@ -147,9 +147,9 @@ const FAQ = () => {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    <div className="px-6 pb-6">
-                      <div className="border-t border-dark-border pt-4">
-                        <p className="text-gray-300 leading-relaxed">
+                    <div className="border-t border-dark-border/80 px-5 pb-5 sm:px-6 sm:pb-6">
+                      <div className="pt-4">
+                        <p className="body-prose pl-[3.75rem] text-ink-muted sm:pl-16">
                           {item.answer}
                         </p>
                       </div>
@@ -163,22 +163,22 @@ const FAQ = () => {
 
         {/* Contact Section */}
         <motion.div
-          className="mt-16 text-center"
+          className="section-divide text-center"
           variants={itemVariants}
         >
-          <div className="card bg-gradient-to-r from-neon-blue/10 to-neon-purple/10 border-neon-blue/30">
-            <h2 className="text-2xl font-bold mb-4 text-white">
+          <div className="cta-panel cta-panel-accent">
+            <h2 className="heading-section mb-4 px-2 pt-1">
               Still Have Questions?
             </h2>
-            <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+            <p className="body-prose mx-auto mb-8 max-w-2xl text-ink-muted">
               Can't find the answer you're looking for? We'd love to hear from you! 
               Reach out to us through our GitHub repository or join our community discussions.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary">
+            <div className="cta-panel__actions">
+              <button type="button" className="btn-primary justify-center px-8 py-3.5 text-base sm:min-w-[10rem] sm:text-lg">
                 Visit GitHub
               </button>
-              <button className="btn-secondary">
+              <button type="button" className="btn-secondary justify-center px-8 py-3.5 text-base sm:min-w-[10rem] sm:text-lg">
                 Join Community
               </button>
             </div>

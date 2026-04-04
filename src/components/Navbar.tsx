@@ -20,11 +20,17 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-bg/90 backdrop-blur-md border-b border-dark-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav
+      className="fixed left-0 right-0 top-0 z-50 border-b border-dark-border bg-dark-bg/88 shadow-nav backdrop-blur-md backdrop-saturate-150"
+      aria-label="Main navigation"
+    >
+      <div className="mx-auto max-w-page px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          <Link
+            to="/"
+            className="flex items-center space-x-2 rounded-md focus-visible:outline-none"
+          >
             <motion.div
               className="text-2xl font-bold text-gradient"
               whileHover={{ scale: 1.05 }}
@@ -40,10 +46,10 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 hover:text-neon-blue ${
+                className={`relative flex min-h-[44px] items-center px-3 py-2 text-sm font-medium transition-colors duration-200 hover:text-ink ${
                   location.pathname === item.path
                     ? 'text-neon-blue'
-                    : 'text-gray-300 hover:text-white'
+                    : 'text-ink-muted hover:text-ink'
                 }`}
               >
                 {item.name}
@@ -62,11 +68,16 @@ const Navbar = () => {
           {/* Mobile menu button */}
           <div className="md:hidden">
             <motion.button
+              type="button"
+              id="mobile-menu-button"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="site-mobile-nav"
+              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
               onClick={toggleMobileMenu}
-              className="text-gray-300 hover:text-white transition-colors duration-200"
-              whileTap={{ scale: 0.95 }}
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-blue focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg"
+              whileTap={{ scale: 0.98 }}
             >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMobileMenuOpen ? <X size={24} aria-hidden /> : <Menu size={24} aria-hidden />}
             </motion.button>
           </div>
         </div>
@@ -80,7 +91,10 @@ const Navbar = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -300 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="md:hidden fixed top-16 left-0 right-0 bg-dark-card border-b border-dark-border shadow-lg"
+            id="site-mobile-nav"
+            role="region"
+            aria-label="Mobile navigation"
+            className="fixed left-0 right-0 top-16 border-b border-dark-border bg-dark-card shadow-card md:hidden"
           >
             <div className="px-4 py-6 space-y-4">
               {navItems.map((item, index) => (
@@ -93,10 +107,10 @@ const Navbar = () => {
                   <Link
                     to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`block px-3 py-2 text-base font-medium transition-all duration-300 hover:text-neon-blue ${
+                    className={`block min-h-[44px] rounded-md px-3 py-3 text-base font-medium transition-colors duration-200 hover:text-neon-blue ${
                       location.pathname === item.path
                         ? 'text-neon-blue'
-                        : 'text-gray-300 hover:text-white'
+                        : 'text-ink-muted hover:text-ink'
                     }`}
                   >
                     {item.name}

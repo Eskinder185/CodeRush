@@ -11,14 +11,23 @@
 
   html {
     scroll-behavior: smooth;
+    color-scheme: dark;
   }
 
   body {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    background-color: #0a0a0a;
-    color: #ffffff;
-    line-height: 1.6;
+    font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+    @apply bg-dark-bg text-ink antialiased;
+    font-size: 0.9375rem;
+    line-height: 1.65;
     overflow-x: hidden;
+  }
+
+  #root a:focus-visible {
+    @apply rounded-sm outline-none ring-2 ring-neon-blue ring-offset-2 ring-offset-dark-bg;
+  }
+
+  ::selection {
+    @apply bg-neon-blue/25 text-ink;
   }
 
   /* Custom scrollbar */
@@ -27,38 +36,224 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #1a1a1a;
+    @apply bg-dark-surface;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #00d4ff;
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #0099cc;
+    @apply rounded bg-neon-blue/50 hover:bg-neon-blue/70;
   }
 }
 
 @layer components {
+  /* Page frame: consistent gutter + offset below fixed nav */
+  .page-shell {
+    @apply min-h-screen w-full pt-20 pb-14 px-4 sm:px-6 lg:px-8;
+  }
+
+  .page-inner {
+    @apply mx-auto w-full max-w-page;
+  }
+
+  .page-inner-narrow {
+    @apply mx-auto w-full max-w-4xl;
+  }
+
+  /* Vertical rhythm between major sections */
+  .section-block {
+    @apply py-16 md:py-20;
+  }
+
+  .section-head {
+    @apply mb-12 text-center md:mb-16;
+  }
+
+  /* Separates stacked sections with a light band + top edge */
+  .section-flow {
+    @apply border-t border-dark-border/60 bg-gradient-to-b from-dark-surface/45 via-dark-bg/80 to-dark-bg;
+  }
+
+  .section-flow-soft {
+    @apply border-t border-dark-border/45 bg-gradient-to-b from-transparent via-dark-surface/20 to-dark-surface/35;
+  }
+
+  /* Accent rule under section titles */
+  .section-rule {
+    @apply mx-auto mt-5 h-px w-14 max-w-full bg-gradient-to-r from-transparent via-neon-blue/45 to-transparent md:mt-6 md:w-16;
+  }
+
+  /* In-page separator when full-width band isn’t used */
+  .section-divide {
+    @apply mt-16 border-t border-dark-border/50 pt-16 md:mt-20 md:pt-20;
+  }
+
+  /* Typography scale */
+  .heading-display {
+    @apply text-display font-bold text-ink;
+  }
+
+  .heading-page {
+    @apply text-page-title font-bold text-ink;
+  }
+
+  .heading-section {
+    @apply text-section-title font-bold text-ink;
+  }
+
+  .body-lead {
+    @apply text-lg leading-relaxed text-ink-muted md:text-xl;
+  }
+
+  .body-prose {
+    @apply text-base leading-relaxed text-ink-muted;
+  }
+
+  .caption {
+    @apply text-sm leading-snug text-ink-subtle;
+  }
+
   .btn-primary {
-    @apply bg-gradient-to-r from-neon-blue to-neon-purple text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-neon-blue/25 active:scale-95;
+    @apply inline-flex items-center justify-center rounded-btn bg-gradient-to-r from-cyan-400 via-neon-blue to-neon-purple px-6 py-3 text-sm font-semibold text-dark-bg shadow-btn-primary transition duration-200;
+    @apply hover:brightness-110 hover:shadow-lg hover:shadow-neon-blue/20 active:scale-[0.98];
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-blue focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg;
   }
 
   .btn-secondary {
-    @apply border-2 border-neon-blue text-neon-blue font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-neon-blue hover:text-white hover:scale-105 active:scale-95;
+    @apply inline-flex items-center justify-center rounded-btn border border-neon-blue/70 bg-transparent px-6 py-3 text-sm font-semibold text-neon-blue transition duration-200;
+    @apply hover:border-neon-blue hover:bg-neon-blue/10 hover:text-cyan-200 active:scale-[0.98];
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-blue focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center rounded-btn border border-rose-500/55 bg-transparent px-6 py-3 text-sm font-semibold text-rose-300 transition duration-200;
+    @apply hover:border-rose-400 hover:bg-rose-500/10 hover:text-rose-200 active:scale-[0.98];
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg;
   }
 
   .card {
-    @apply bg-dark-card border border-dark-border rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-neon-blue/50 hover:shadow-neon-blue/10;
+    @apply rounded-card border border-dark-border/90 bg-dark-card p-6 shadow-card transition duration-200;
+    @apply hover:border-neon-blue/35 hover:shadow-card-hover;
+  }
+
+  /* Feature / benefit tiles — equal height, calm hover */
+  .feature-card {
+    @apply flex h-full min-h-[12.5rem] flex-col rounded-card border border-dark-border bg-gradient-to-b from-dark-surface/90 to-dark-card p-7 text-center shadow-card transition duration-200 sm:p-8;
+    @apply hover:-translate-y-0.5 hover:border-neon-blue/40 hover:shadow-card-hover;
+  }
+
+  .feature-card__icon {
+    @apply mx-auto mb-5 flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-neon-blue/25 bg-neon-blue/[0.09] text-neon-blue transition duration-200;
+  }
+
+  .group:hover .feature-card__icon {
+    @apply border-neon-blue/45 bg-neon-blue/[0.14];
+  }
+
+  .feature-card__title {
+    @apply mb-3 text-lg font-semibold tracking-tight text-ink;
+  }
+
+  .feature-card__body {
+    @apply flex-1 text-base leading-relaxed text-ink-subtle;
+  }
+
+  /* Bottom-of-page CTAs */
+  .cta-panel {
+    @apply relative overflow-hidden rounded-card border border-dark-border px-6 py-10 text-center shadow-card sm:px-10 sm:py-11 md:px-12 md:py-12;
+  }
+
+  .cta-panel::before {
+    content: '';
+    @apply pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-neon-blue/50 to-transparent sm:inset-x-12;
+  }
+
+  .cta-panel-accent {
+    @apply border-neon-blue/25 bg-gradient-to-br from-neon-blue/[0.09] via-dark-card to-neon-purple/[0.07];
+  }
+
+  /* Inline highlight block (e.g. sidebar on About) */
+  .highlight-panel {
+    @apply rounded-card border border-neon-blue/25 bg-gradient-to-br from-neon-blue/[0.08] via-dark-card to-neon-purple/[0.06] p-8 shadow-card md:p-9;
+  }
+
+  .cta-panel__actions {
+    @apply flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4;
+  }
+
+  /* FAQ / accordion rows */
+  .accordion-card {
+    @apply overflow-hidden rounded-card border border-dark-border/95 bg-gradient-to-b from-dark-surface/50 to-dark-card shadow-card transition duration-200;
+    @apply hover:border-dark-border hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.45)];
+  }
+
+  /* Browse grids (e.g. languages) */
+  .content-card {
+    @apply flex h-full flex-col rounded-card border border-dark-border/95 bg-gradient-to-b from-dark-surface/70 to-dark-card p-6 shadow-card transition duration-200 md:p-7;
+    @apply hover:border-neon-blue/40 hover:shadow-card-hover;
+  }
+
+  /* Languages search */
+  .search-shell {
+    @apply relative overflow-hidden rounded-btn border border-dark-border/90 bg-gradient-to-b from-dark-surface/90 to-dark-card shadow-card transition duration-200;
+  }
+
+  .search-shell:focus-within {
+    @apply border-neon-blue/45 ring-1 ring-neon-blue/25;
+  }
+
+  /* Lesson hub list rows — same family as content-card */
+  .lesson-card {
+    @apply rounded-card border border-dark-border/95 bg-gradient-to-b from-dark-surface/70 to-dark-card p-5 shadow-card transition duration-200 sm:p-6 md:p-7;
+    @apply hover:border-neon-blue/40 hover:shadow-card-hover;
+  }
+
+  /* Progress stats strip */
+  .stat-slab {
+    @apply flex flex-col rounded-card border border-dark-border/90 bg-gradient-to-b from-dark-surface/85 to-dark-card p-4 text-center shadow-card sm:p-5 sm:text-left;
+  }
+
+  .stat-slab__icon {
+    @apply mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg border border-neon-blue/25 bg-neon-blue/[0.08] text-neon-blue sm:mx-0;
+  }
+
+  .stat-slab__icon--muted {
+    @apply border-neon-purple/25 bg-neon-purple/[0.08] text-neon-purple;
+  }
+
+  /* Difficulty filters / badges */
+  .filter-tab {
+    @apply inline-flex min-h-[44px] w-full items-center justify-center rounded-btn border px-3 text-center text-sm font-medium transition duration-200 sm:w-auto sm:px-4;
+  }
+
+  .badge-diff-beginner {
+    @apply inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold tracking-tight text-emerald-200/95;
+  }
+
+  .badge-diff-intermediate {
+    @apply inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold tracking-tight text-amber-100/95;
+  }
+
+  .badge-diff-advanced {
+    @apply inline-flex items-center rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-0.5 text-xs font-semibold tracking-tight text-rose-200/95;
+  }
+
+  .concept-chip {
+    @apply inline-flex items-center rounded-md border border-dark-border/90 bg-dark-bg/90 px-2 py-1 text-xs font-medium text-ink-muted;
+  }
+
+  .empty-state-panel {
+    @apply mx-auto max-w-md rounded-card border border-dashed border-dark-border/80 bg-dark-surface/40 px-6 py-10 text-center sm:px-8;
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-cyan-300 via-neon-blue to-neon-purple bg-clip-text text-transparent;
   }
 
   .glow {
-    @apply shadow-lg shadow-neon-blue/25;
+    @apply shadow-lg shadow-neon-blue/20;
+  }
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-blue focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg;
   }
 }
 
@@ -77,29 +272,30 @@
   position: absolute;
   width: 2px;
   height: 2px;
-  background: #00d4ff;
+  background: #22d3ee;
   border-radius: 50%;
   animation: float 6s ease-in-out infinite;
-  opacity: 0.3;
+  opacity: 0.35;
 }
 
 .particle:nth-child(odd) {
   animation-delay: -2s;
-  background: #8b5cf6;
+  background: #a78bfa;
 }
 
 .particle:nth-child(3n) {
   animation-delay: -4s;
-  background: #00d4ff;
+  background: #22d3ee;
 }
 
 /* Syntax highlighting overrides */
 .syntax-highlighter {
-  background: #1a1a1a !important;
-  border-radius: 8px !important;
+  background: #14151c !important;
+  border-radius: 0.75rem !important;
   padding: 1.5rem !important;
   font-size: 0.9rem !important;
-  line-height: 1.6 !important;
+  line-height: 1.65 !important;
+  border: 1px solid rgba(42, 46, 58, 0.9) !important;
 }
 
 /* Mobile menu animations */
@@ -131,13 +327,12 @@
   background-color: #f44747 !important;
 }
 
-/* Custom Monaco Editor themes */
 .monaco-editor .view-overlays .current-line {
-  border: 1px solid #00d4ff !important;
-  background-color: rgba(0, 212, 255, 0.1) !important;
+  border: 1px solid #22d3ee !important;
+  background-color: rgba(34, 211, 238, 0.08) !important;
 }
 
 .monaco-editor .margin-view-overlays .current-line-margin {
-  border-left: 2px solid #00d4ff !important;
-  background-color: rgba(0, 212, 255, 0.1) !important;
+  border-left: 2px solid #22d3ee !important;
+  background-color: rgba(34, 211, 238, 0.08) !important;
 }

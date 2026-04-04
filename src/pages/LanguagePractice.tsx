@@ -314,12 +314,12 @@ func (us *UserService) GetAllUsers() []User {
 
   return (
     <motion.div
-      className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8"
+      className="page-shell"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="page-inner">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
@@ -334,7 +334,7 @@ func (us *UserService) GetAllUsers() []User {
               <h1 className="text-3xl md:text-4xl font-bold">
                 <span className="text-gradient">{languageName}</span> Practice
               </h1>
-              <p className="text-gray-400">
+              <p className="text-ink-subtle">
                 Practice typing {languageName} code with real-world examples
               </p>
             </div>
@@ -364,7 +364,7 @@ func (us *UserService) GetAllUsers() []User {
             </div>
             
             <div className="relative">
-              <pre className="bg-dark-bg border border-dark-border rounded-lg p-4 text-sm text-gray-300 font-mono overflow-x-auto">
+              <pre className="bg-dark-bg border border-dark-border rounded-lg p-4 text-sm text-ink-muted font-mono overflow-x-auto">
                 <code>{codeSnippet}</code>
               </pre>
             </div>
@@ -382,17 +382,17 @@ func (us *UserService) GetAllUsers() []User {
               <div className="card text-center">
                 <Clock className="w-6 h-6 text-neon-blue mx-auto mb-2" />
                 <div className="text-2xl font-bold text-white">{formatTime(timeElapsed)}</div>
-                <div className="text-sm text-gray-400">Time</div>
+                <div className="text-sm text-ink-subtle">Time</div>
               </div>
               <div className="card text-center">
                 <Target className="w-6 h-6 text-neon-purple mx-auto mb-2" />
                 <div className="text-2xl font-bold text-white">{accuracy}%</div>
-                <div className="text-sm text-gray-400">Accuracy</div>
+                <div className="text-sm text-ink-subtle">Accuracy</div>
               </div>
               <div className="card text-center">
                 <Zap className="w-6 h-6 text-neon-blue mx-auto mb-2" />
                 <div className="text-2xl font-bold text-white">{wpm}</div>
-                <div className="text-sm text-gray-400">WPM</div>
+                <div className="text-sm text-ink-subtle">WPM</div>
               </div>
             </div>
 
@@ -409,7 +409,7 @@ func (us *UserService) GetAllUsers() []User {
                 className="w-full h-40 bg-dark-bg border border-dark-border rounded-lg p-4 text-white font-mono text-sm resize-none focus:border-neon-blue focus:outline-none transition-colors duration-300"
                 spellCheck={false}
               />
-              <div className="mt-4 text-sm text-gray-400">
+              <div className="mt-4 text-sm text-ink-subtle">
                 Progress: {userInput.length} / {codeSnippet.length} characters
               </div>
             </div>
@@ -419,7 +419,7 @@ func (us *UserService) GetAllUsers() []User {
               <h3 className="text-lg font-semibold text-white mb-3">
                 🚧 Enhanced Features Coming Soon
               </h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
+              <ul className="space-y-2 text-ink-muted text-sm">
                 <li>• Syntax highlighting for better code readability</li>
                 <li>• Multiple difficulty levels and code snippets</li>
                 <li>• Progress tracking and performance analytics</li>

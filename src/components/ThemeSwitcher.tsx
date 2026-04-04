@@ -40,7 +40,7 @@ const ThemeSwitcher = ({ currentTheme, onThemeChange }: ThemeSwitcherProps) => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 bg-dark-card border border-dark-border rounded-lg text-gray-300 hover:text-white hover:border-neon-blue transition-all duration-300"
+        className="flex items-center space-x-2 px-3 py-2 bg-dark-card border border-dark-border rounded-btn text-ink-muted hover:text-ink hover:border-neon-blue transition-all duration-300"
       >
         <Palette className="w-4 h-4" />
         <span className="text-sm">{currentThemeData.name}</span>
@@ -64,7 +64,7 @@ const ThemeSwitcher = ({ currentTheme, onThemeChange }: ThemeSwitcherProps) => {
             className="absolute top-full mt-2 right-0 w-64 bg-dark-card border border-dark-border rounded-lg shadow-lg z-50"
           >
             <div className="p-2">
-              <div className="text-xs text-gray-400 px-3 py-2 border-b border-dark-border">
+              <div className="text-xs text-ink-subtle px-3 py-2 border-b border-dark-border">
                 Choose Editor Theme
               </div>
               {themes.map((theme) => (
@@ -77,13 +77,13 @@ const ThemeSwitcher = ({ currentTheme, onThemeChange }: ThemeSwitcherProps) => {
                   className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 ${
                     currentTheme === theme.id
                       ? 'bg-neon-blue/20 text-neon-blue border border-neon-blue/30'
-                      : 'text-gray-300 hover:text-white hover:bg-dark-bg'
+                      : 'text-ink-muted hover:text-ink hover:bg-dark-bg'
                   }`}
                 >
                   <div className={`w-6 h-6 rounded ${theme.preview} border border-gray-600`}></div>
                   <div className="flex-1 text-left">
                     <div className="text-sm font-medium">{theme.name}</div>
-                    <div className="text-xs text-gray-400">{theme.description}</div>
+                    <div className="text-xs text-ink-subtle">{theme.description}</div>
                   </div>
                   {currentTheme === theme.id && (
                     <div className="w-2 h-2 bg-neon-blue rounded-full"></div>

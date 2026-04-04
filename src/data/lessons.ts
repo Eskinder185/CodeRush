@@ -23,6 +23,10 @@ export interface UserStats {
   completedAt: Date
   mistakes: number
   symbolsMissed: string[]
+  /** Present on sessions saved after export feature; inferred in export for older rows. */
+  cpm?: number
+  totalChars?: number
+  correctChars?: number
 }
 
 export const languageTracks: LanguageTrack[] = [

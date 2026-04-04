@@ -29,10 +29,10 @@ class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen flex items-center justify-center bg-dark-bg px-4">
           <div className="text-center max-w-md">
             <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-white mb-4">
+            <h1 className="mb-4 text-2xl font-bold text-ink">
               Oops! Something went wrong
             </h1>
-            <p className="text-gray-400 mb-6">
+            <p className="body-prose mb-6 text-ink-subtle">
               We're sorry, but something unexpected happened. Please try refreshing the page.
             </p>
             <button

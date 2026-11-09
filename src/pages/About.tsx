@@ -1,214 +1,68 @@
-import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { Code, Users, Heart, Github, Star } from 'lucide-react'
+import { Github } from 'lucide-react'
+import { ButtonLink, PageHeader } from '../components/ui'
+import { usePageMeta } from '../app/context'
+import { REPO_URL } from '../app/Footer'
+import { commands } from '../content/commands'
+import { scenarios } from '../content/scenarios'
+import { learningPaths } from '../content/paths'
+import { codeLessonCount, languageTracks } from '../content/code'
 
-const About = () => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-      },
-    },
-  }
-
-  const features = [
-    {
-      icon: <Code className="w-8 h-8" />,
-      title: "Real-World Code",
-      description: "Practice with actual code snippets from popular open-source projects and common programming patterns."
-    },
-    {
-      icon: <Users className="w-8 h-8" />,
-      title: "Community Driven",
-      description: "Built by developers, for developers. Contribute your own code snippets to help others learn."
-    },
-    {
-      icon: <Heart className="w-8 h-8" />,
-      title: "Open Source",
-      description: "Completely free and open source. Help us improve CodeRush by contributing to the project."
-    }
-  ]
-
-  const stats = [
-    { number: "1000+", label: "Code Snippets" },
-    { number: "15+", label: "Languages" },
-    { number: "50+", label: "Contributors" },
-    { number: "10K+", label: "Practice Sessions" }
-  ]
-
+export default function About() {
+  usePageMeta('About', 'What CodeRush is, how it measures progress, and how the Command Lab stays safe.')
+  const modules = learningPaths.reduce((n, p) => n + p.modules.length, 0)
+  const quiz = learningPaths.reduce((n, p) => n + p.modules.reduce((m, x) => m + x.quiz.length, 0), 0)
   return (
-    <motion.div
-      className="page-shell"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <div className="page-inner">
-        {/* Hero Section */}
-        <motion.div
-          className="section-head max-w-4xl md:mx-auto"
-          variants={itemVariants}
-        >
-          <h1 className="heading-page mb-0 px-2">
-            About <span className="text-gradient">CodeRush</span>
-          </h1>
-          <div className="section-rule" aria-hidden />
-          <p className="body-lead mx-auto mt-5 max-w-3xl text-ink-subtle md:mt-6">
-            CodeRush is an open-source typing practice platform designed specifically for developers 
-            who want to improve their coding speed and accuracy. We believe that typing code efficiently 
-            is a crucial skill that can significantly boost your productivity as a developer.
-          </p>
-        </motion.div>
+    <div className="page max-w-4xl">
+      <PageHeader eyebrow="About" title="Type faster. Learn deeper. Master your tools." lead="CodeRush is a free, open-source practice platform for people who work with code and command lines: students, developers, IT and network technicians, administrators, and security analysts." />
 
-        {/* Mission Section */}
-        <motion.div
-          className="card mb-16 p-8 text-center md:p-10"
-          variants={itemVariants}
-        >
-          <h2 className="heading-section mb-6">Our Mission</h2>
-          <p className="body-prose mx-auto max-w-4xl text-ink-muted md:text-lg">
-            To help developers master the art of coding by providing a platform where they can practice 
-            typing real-world code snippets. We focus on building muscle memory for common programming 
-            patterns, syntax, and structures across multiple programming languages.
-          </p>
-        </motion.div>
+      <section className="prose-cr">
+        <h2 className="text-h2 text-fg">What is in it</h2>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>{codeLessonCount} programming typing lessons in {languageTracks.length} languages.</li>
+          <li>{commands.length} command exercises for Linux, PowerShell, Windows networking, and Cisco IOS.</li>
+          <li>{scenarios.length} troubleshooting scenarios with simulated output.</li>
+          <li>{learningPaths.length} learning paths with {modules} modules and {quiz} quiz questions.</li>
+          <li>A subnetting trainer, a network topology explorer, a daily challenge, and a progress dashboard.</li>
+        </ul>
+        <p>These numbers are counted from the content files at build time, and automated tests check every record for completeness.</p>
+      </section>
 
-        {/* Features Grid */}
-        <motion.div
-          className="section-divide mb-16 grid auto-rows-fr gap-6 sm:gap-8 md:grid-cols-3"
-          variants={itemVariants}
-        >
-          {features.map((feature, index) => (
-            <div key={index} className="group feature-card h-full">
-              <div className="feature-card__icon [&_svg]:h-7 [&_svg]:w-7">
-                {feature.icon}
-              </div>
-              <h3 className="feature-card__title">{feature.title}</h3>
-              <p className="feature-card__body">{feature.description}</p>
-            </div>
-          ))}
-        </motion.div>
+      <section id="mastery" className="prose-cr mt-10 scroll-mt-24">
+        <h2 className="text-h2 text-fg">How progress is measured</h2>
+        <p>
+          <strong>Typing speed and knowledge are measured separately.</strong> Net WPM is correct characters divided by five, per minute. Raw WPM counts every keystroke. Accuracy is correct keystrokes divided by all keystrokes, so mistakes you fixed with Backspace still count.
+        </p>
+        <p>
+          <strong>A programming lesson passes only on an exact match.</strong> Reaching the end with wrong characters is recorded as an attempt, not a completion.
+        </p>
+        <p>
+          <strong>Command mastery</strong> runs from 0 to 100: typing 30% (best accuracy on a perfect attempt), recall 40% (up to two correct answers from memory), and repetition 30% (success on up to three different days). Typing speed never affects it. A command is <em>practiced</em> at 40 and <em>mastered</em> at 80 with at least one successful recall.
+        </p>
+        <p>
+          <strong>Module mastery</strong> combines the module&rsquo;s commands or lessons (60%), its quiz (25%), and its scenarios (15%), reweighted when a module lacks a part. A module is complete when the quiz reaches 50%, every command is practiced, every lesson is passed, and every scenario is finished.
+        </p>
+        <p>
+          <strong>Recommendations are rules, not AI.</strong> A character group is suggested for a drill after at least 15 recent attempts with an error rate of 6% or more, and the page shows the numbers behind each suggestion.
+        </p>
+      </section>
 
-        {/* Stats Section */}
-        <motion.div
-          className="card mb-16 p-8 md:p-10"
-          variants={itemVariants}
-        >
-          <h2 className="heading-section mb-2 text-center">By the Numbers</h2>
-          <div className="section-rule mx-auto mb-10" aria-hidden />
-          <div className="grid grid-cols-2 gap-8 gap-y-10 md:grid-cols-4 md:gap-10">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="mb-2 text-4xl font-bold text-gradient">
-                  {stat.number}
-                </div>
-                <div className="caption">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+      <section className="prose-cr mt-10">
+        <h2 className="text-h2 text-fg">How the Command Lab stays safe</h2>
+        <p>The terminal is a simulation. What you type is compared with the answers stored for each lesson and is never executed: not in your browser, not on a server, not anywhere. Output is curated sample text that uses documentation-reserved addresses, and it is labelled as simulated.</p>
+        <p>Security content is defensive and uses synthetic data. Commands that change a system are labelled, and the lessons tell you to practice them only on systems you are authorized to manage.</p>
+      </section>
 
-        {/* Why CodeRush Section */}
-        <motion.div
-          className="section-divide mb-16 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-14"
-          variants={itemVariants}
-        >
-          <div>
-            <h2 className="heading-section mb-2">Why CodeRush?</h2>
-            <div className="section-rule ml-0 mr-auto mb-8 w-14" aria-hidden />
-            <div className="space-y-6">
-              <div>
-                <h3 className="mb-2 text-xl font-semibold text-neon-blue">Real Code Practice</h3>
-                <p className="body-prose text-ink-subtle">
-                  Unlike traditional typing tests, CodeRush uses actual code snippets from real projects, 
-                  helping you build muscle memory for programming syntax and patterns.
-                </p>
-              </div>
-              <div>
-                <h3 className="mb-2 text-xl font-semibold text-neon-purple">Multiple Languages</h3>
-                <p className="body-prose text-ink-subtle">
-                  Practice with Python, JavaScript, TypeScript, Go, Rust, and many more languages. 
-                  Each language has its own unique syntax and patterns to master.
-                </p>
-              </div>
-              <div>
-                <h3 className="mb-2 text-xl font-semibold text-neon-blue">Progress Tracking</h3>
-                <p className="body-prose text-ink-subtle">
-                  Monitor your improvement with detailed statistics including typing speed, accuracy, 
-                  and progress over time.
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="highlight-panel lg:sticky lg:top-24">
-            <h3 className="mb-4 text-xl font-bold tracking-tight text-ink md:text-2xl">Get Involved</h3>
-            <p className="body-prose mb-6 text-ink-muted">
-              CodeRush is an open-source project that thrives on community contributions. 
-              Whether you're a beginner or an experienced developer, there are many ways to contribute.
-            </p>
-            <div className="space-y-4">
-              <button className="btn-primary w-full flex items-center justify-center">
-                <Github className="w-5 h-5 mr-2" />
-                View on GitHub
-              </button>
-              <button className="btn-secondary w-full flex items-center justify-center">
-                <Star className="w-5 h-5 mr-2" />
-                Star the Project
-              </button>
-            </div>
-          </div>
-        </motion.div>
+      <section className="prose-cr mt-10">
+        <h2 className="text-h2 text-fg">Accuracy of the content</h2>
+        <p>Each command links to its official documentation. Command syntax was written against those references by the content author and has not been independently reviewed; any entry that needs verification is marked in the lesson. If you find a mistake, please report it.</p>
+      </section>
 
-        {/* Call to Action */}
-        <motion.div
-          className="section-divide text-center"
-          variants={itemVariants}
-        >
-          <div className="cta-panel cta-panel-accent">
-            <h2 className="heading-section mb-4 px-2 pt-1">
-              Ready to Start Your <span className="text-gradient">Coding Journey</span>?
-            </h2>
-            <p className="body-prose mx-auto mb-8 max-w-2xl text-ink-muted md:text-lg">
-              Join thousands of developers who are already improving their coding skills with CodeRush. 
-              Start practicing today and see the difference in your productivity.
-            </p>
-            <div className="cta-panel__actions">
-              <Link
-                to="/languages"
-                className="btn-primary justify-center px-8 py-3.5 text-base sm:min-w-[11rem] sm:text-lg"
-              >
-                Choose Your Language
-              </Link>
-              <Link
-                to="/faq"
-                className="btn-secondary justify-center px-8 py-3.5 text-base sm:min-w-[11rem] sm:text-lg"
-              >
-                View FAQ
-              </Link>
-            </div>
-          </div>
-        </motion.div>
+      <div className="mt-10 flex flex-wrap gap-3">
+        <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-md border border-line-strong bg-surface px-4 text-sm font-medium interactive">
+          <Github className="h-4 w-4" aria-hidden /> Source on GitHub
+        </a>
+        <ButtonLink to="/learn">Explore the learning paths</ButtonLink>
       </div>
-    </motion.div>
+    </div>
   )
 }
-
-export default About

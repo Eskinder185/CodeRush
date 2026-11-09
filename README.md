@@ -1,131 +1,98 @@
 # CodeRush
 
-**Practice typing real code, faster.**
+**Type faster. Learn deeper. Master your tools.**
 
-CodeRush is a modern typing practice platform designed specifically for developers. Unlike traditional typing tests, CodeRush uses real code snippets from popular programming languages to help you build muscle memory for programming syntax and improve your coding speed.
+CodeRush is a free, browser-based practice platform for people who work with code and command lines. It combines three things in one design system and one progress model:
+
+- **Typing mastery**: type real code and commands with live WPM, accuracy, and mistake tracking.
+- **Structured learning**: learning paths with concepts, guided lessons, quizzes, recall checks, and scenarios.
+- **Practical technical skills**: a Command Lab for Linux, PowerShell, Windows networking, and Cisco IOS, with a safe simulated terminal.
+
+Live site: <https://eskinder185.github.io/CodeRush/>
+
+## What is included
+
+These counts come from the content files and are enforced by `src/content/content.test.ts`.
+
+| Content | Count |
+| --- | --- |
+| Programming typing lessons, preserved from 1.x | 45, in 9 languages |
+| Command exercises | 242: Linux 119, PowerShell 89, Windows CMD 17, Cisco IOS 17 |
+| Troubleshooting scenarios | 32: Linux 8, PowerShell 8, networking 6, Cisco 4, security 6 |
+| Learning paths | 8, with 113 modules |
+| Quiz questions | 210 |
+
+Learning paths: Programming Syntax (9 modules), Linux Command Line (13), Windows PowerShell (27), Networking Fundamentals (24), Defensive Cybersecurity (19), Linux Networking (10), Linux Security (6), and Cisco IOS Essentials (5).
 
 ## Features
 
-### 🎓 **Structured Learning**
-- **Beginner to Advanced Lessons** - Progressive difficulty levels for each language
-- **Real Code Snippets** - Practice with authentic code from real projects
-- **Concept-Based Learning** - Each lesson focuses on specific programming concepts
+- **Typing practice**: Speed Test, Timed Challenge (15, 30, 60, or 120 s), Accuracy Training (wrong keys do not advance), Command Practice, Syntax Training, Custom Practice, and Recall Mode.
+- **Typing engine**: net and raw WPM, accuracy that counts corrected mistakes, uncorrected and corrected errors, missing and excess characters, paste blocking, IME composition, Unicode, multiline text, forgiving or strict indentation, and an explicit Tab mechanism.
+- **Focus Mode**, keyboard shortcuts, an on-screen keyboard guide, and on-screen symbol keys for phones.
+- **Guided command lessons** in seven steps: Learn, Understand, Observe, Type, Recall, Apply, Review.
+- **Command Lab**: platform tabs, search and filters, saved and recent commands, a free-exploration terminal, and scenario practice.
+- **Interactive tools**: a subnetting trainer with generated exercises and step-by-step working, and a clickable network topology.
+- **Smart mistake training**: rule-based drills built from the characters you miss, plus detection of commands you confuse.
+- **Mastery** that is separate from speed. See [docs/MASTERY.md](docs/MASTERY.md).
+- **Daily challenge** that is the same for everyone on a date, with personal best, history, and a gentle streak.
+- **Progress dashboard** with charts drawn from recorded data, a key heatmap, achievements, history, and import and export.
+- **Unified search** across commands, lessons, paths, modules, and scenarios, with synonyms.
+- **Dark and light themes**, reduced-motion support, and adjustable typing settings.
 
-### 🎯 **Multiple Practice Modes**
-- **Structured Lessons** - Guided learning with clear objectives
-- **Free Practice Mode** - Customizable practice with random code snippets
-- **Multiple Languages** - Python, JavaScript, TypeScript, Go, Java, C++, HTML/CSS, SQL, Bash
+## Safety
 
-### 📊 **Advanced Progress Tracking**
-- **Detailed Statistics** - WPM, accuracy, time spent, and mistake tracking
-- **Language-Specific Progress** - Track improvement for each programming language
-- **Achievement System** - Unlock badges for milestones and accomplishments
-- **Data Export/Import** - Save and share your progress
+The Command Lab never executes anything. Input is compared with stored answers in `src/lib/terminal/match.ts`, and output is curated text from the content files. Sample output uses documentation-reserved addresses (RFC 5737, RFC 3849), and the content tests reject other public addresses. Security content is defensive and uses synthetic data. Commands that change state are labelled, and lessons say to practice them only on systems you are authorized to manage.
 
-### 🎨 **Modern Developer Experience**
-- **Code Editor Styling** - VS Code-inspired interface with syntax highlighting
-- **Customizable Settings** - Adjust test length, symbols, and themes
-- **Responsive Design** - Works perfectly on desktop, tablet, and mobile
-- **Smooth Animations** - Beautiful transitions and hover effects
+## Privacy
 
-## Tech Stack
+There are no accounts, analytics, or backend. Progress is stored in the browser's local storage and does not sync between devices. Export a file from the Progress page to back it up.
 
-- **Frontend**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **Animations**: Framer Motion
-- **Routing**: React Router
-- **Code Highlighting**: React Syntax Highlighter
-- **Icons**: Lucide React
+CodeRush 1.x progress (`coderush_user_stats`) is migrated automatically on first load. The old key is left in place as a backup.
 
-## Getting Started
+## Development
 
-### Prerequisites
+Requirements: Node.js 20 or newer.
 
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/coderush.git
-cd coderush
+npm ci
+npm run dev          # http://localhost:3000
+npm run typecheck
+npm run lint
+npm test             # unit, content validation, and UI tests (Vitest)
+npm run build        # production build to dist/, with 404.html for deep links
+npm run test:e2e     # Playwright against the build served at /CodeRush/
+npm run ci           # everything above, in order
 ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+Playwright needs Chromium once: `npx playwright install chromium`.
 
-3. Start the development server:
-```bash
-npm run dev
-```
-
-4. Open your browser and navigate to `http://localhost:5173`
-
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-
-## Project Structure
+### Project layout
 
 ```
 src/
-├── components/          # Reusable UI components
-│   ├── Navbar.tsx      # Navigation component
-│   └── ParticleBackground.tsx
-├── pages/              # Page components
-│   ├── Home.tsx        # Landing page
-│   ├── Python.tsx      # Python practice page
-│   ├── JavaScript.tsx  # JavaScript practice page
-│   ├── About.tsx       # About page
-│   └── FAQ.tsx         # FAQ page
-├── App.tsx             # Main app component
-├── main.tsx            # App entry point
-└── index.css           # Global styles
+  app/          shell: navigation, dialogs, search, settings, footer
+  pages/        one lazily loaded file per route
+  components/   ui primitives, typing, terminal, charts, graphics, learning
+  content/      all curriculum data, separate from UI, validated by content.test.ts
+    code/       the 45 programming lessons, one file per language
+    commands/   command exercises by platform
+    scenarios/  troubleshooting scenarios
+    paths/      learning paths, modules, and quizzes
+  lib/          logic with no React: typing engine, storage, mastery, search,
+                recommendations, subnetting, daily challenge, terminal matching
+  styles/       design tokens (CSS variables for dark and light themes)
+e2e/            Playwright tests
+docs/           mastery model, content guide, audit notes, backlog
 ```
+
+See [docs/CONTENT.md](docs/CONTENT.md) for how to add commands, scenarios, and modules.
+
+## Deployment
+
+One workflow, `.github/workflows/deploy-pages.yml`, runs type checking, linting, unit tests, the build, and browser tests on every push and pull request. On `main` it uploads `dist/` and deploys with the GitHub Pages Actions. In the repository settings, Pages must use **GitHub Actions** as its source.
+
+The site is served from `/CodeRush/`. Vite's `base` and the router's `basename` both come from that one setting in `vite.config.ts`. The build copies `index.html` to `404.html`, so deep links such as `/CodeRush/lab/command/linux.pwd` load the app.
 
 ## Contributing
 
-We welcome contributions from the community! Here are some ways you can help:
-
-1. **Add Code Snippets** - Submit real-world code examples for different languages
-2. **Bug Reports** - Report issues you encounter
-3. **Feature Requests** - Suggest new features or improvements
-4. **Documentation** - Help improve our documentation
-5. **Code Contributions** - Submit pull requests for bug fixes or new features
-
-### How to Contribute
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Thanks to all contributors who help make CodeRush better
-- Inspired by the need for better coding practice tools
-- Built with love for the developer community
-
-## Support
-
-If you find CodeRush helpful, please consider:
-- ⭐ Starring the repository
-- 🐛 Reporting bugs
-- 💡 Suggesting new features
-- 🤝 Contributing code
-
----
-
-**Happy Coding!** 🚀
+Bug reports and content corrections are welcome: <https://github.com/Eskinder185/CodeRush/issues>. Each command lists its documentation source. Command syntax was written against those references by the content author and has not been independently reviewed.

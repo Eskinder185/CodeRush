@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+e2e-report
+test-results
+playwright-report
+coverage

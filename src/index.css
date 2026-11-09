@@ -1,338 +1,156 @@
+@import './styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
   html {
-    scroll-behavior: smooth;
-    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
   }
-
   body {
-    font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
-    @apply bg-dark-bg text-ink antialiased;
-    font-size: 0.9375rem;
-    line-height: 1.65;
+    @apply bg-bg font-sans text-fg antialiased;
+    font-size: 1rem;
+    line-height: 1.6;
     overflow-x: hidden;
   }
-
-  #root a:focus-visible {
-    @apply rounded-sm outline-none ring-2 ring-neon-blue ring-offset-2 ring-offset-dark-bg;
+  code,
+  kbd,
+  pre,
+  samp {
+    @apply font-mono;
+    font-variant-ligatures: none;
   }
-
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+  }
   ::selection {
-    @apply bg-neon-blue/25 text-ink;
+    background: rgb(var(--accent) / 0.28);
   }
-
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    overflow-wrap: anywhere;
   }
-
-  ::-webkit-scrollbar-track {
-    @apply bg-dark-surface;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply rounded bg-neon-blue/50 hover:bg-neon-blue/70;
+  /* A grid without explicit columns must not grow to its widest child (terminals, code). */
+  :where(.grid) {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @layer components {
-  /* Page frame: consistent gutter + offset below fixed nav */
-  .page-shell {
-    @apply min-h-screen w-full pt-20 pb-14 px-4 sm:px-6 lg:px-8;
+  .page {
+    @apply mx-auto w-full max-w-page px-4 pb-20 pt-24 sm:px-6 lg:px-8;
   }
-
-  .page-inner {
-    @apply mx-auto w-full max-w-page;
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-accent;
   }
-
-  .page-inner-narrow {
-    @apply mx-auto w-full max-w-4xl;
+  .lead {
+    @apply text-base leading-relaxed text-fg-muted sm:text-lg;
   }
-
-  /* Vertical rhythm between major sections */
-  .section-block {
-    @apply py-16 md:py-20;
+  .panel {
+    @apply rounded-lg border border-line bg-surface shadow-e1;
   }
-
-  .section-head {
-    @apply mb-12 text-center md:mb-16;
+  .panel-pad {
+    @apply p-5 sm:p-6;
   }
-
-  /* Separates stacked sections with a light band + top edge */
-  .section-flow {
-    @apply border-t border-dark-border/60 bg-gradient-to-b from-dark-surface/45 via-dark-bg/80 to-dark-bg;
+  .interactive {
+    @apply transition duration-fast ease-out hover:border-line-strong hover:bg-elevated;
   }
-
-  .section-flow-soft {
-    @apply border-t border-dark-border/45 bg-gradient-to-b from-transparent via-dark-surface/20 to-dark-surface/35;
+  .kbd {
+    @apply inline-flex min-w-[1.5em] items-center justify-center rounded border border-b-2 border-line-strong bg-elevated px-1.5 font-mono text-2xs font-semibold leading-5 text-fg-muted;
   }
-
-  /* Accent rule under section titles */
-  .section-rule {
-    @apply mx-auto mt-5 h-px w-14 max-w-full bg-gradient-to-r from-transparent via-neon-blue/45 to-transparent md:mt-6 md:w-16;
+  .code-inline {
+    @apply rounded border border-line bg-sunken px-1.5 py-0.5 font-mono text-[0.88em] text-fg;
   }
-
-  /* In-page separator when full-width band isn’t used */
-  .section-divide {
-    @apply mt-16 border-t border-dark-border/50 pt-16 md:mt-20 md:pt-20;
+  .prose-cr {
+    @apply max-w-prose space-y-4 leading-relaxed text-fg-muted;
   }
-
-  /* Typography scale */
-  .heading-display {
-    @apply text-display font-bold text-ink;
+  .prose-cr strong {
+    @apply font-semibold text-fg;
   }
-
-  .heading-page {
-    @apply text-page-title font-bold text-ink;
+  .skeleton {
+    background: linear-gradient(90deg, rgb(var(--surface)) 0%, rgb(var(--elevated)) 50%, rgb(var(--surface)) 100%);
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded;
   }
-
-  .heading-section {
-    @apply text-section-title font-bold text-ink;
-  }
-
-  .body-lead {
-    @apply text-lg leading-relaxed text-ink-muted md:text-xl;
-  }
-
-  .body-prose {
-    @apply text-base leading-relaxed text-ink-muted;
-  }
-
-  .caption {
-    @apply text-sm leading-snug text-ink-subtle;
-  }
-
-  .btn-primary {
-    @apply inline-flex items-center justify-center rounded-btn bg-gradient-to-r from-cyan-400 via-neon-blue to-neon-purple px-6 py-3 text-sm font-semibold text-dark-bg shadow-btn-primary transition duration-200;
-    @apply hover:brightness-110 hover:shadow-lg hover:shadow-neon-blue/20 active:scale-[0.98];
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-blue focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg;
-  }
-
-  .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-btn border border-neon-blue/70 bg-transparent px-6 py-3 text-sm font-semibold text-neon-blue transition duration-200;
-    @apply hover:border-neon-blue hover:bg-neon-blue/10 hover:text-cyan-200 active:scale-[0.98];
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-blue focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg;
-  }
-
-  .btn-danger {
-    @apply inline-flex items-center justify-center rounded-btn border border-rose-500/55 bg-transparent px-6 py-3 text-sm font-semibold text-rose-300 transition duration-200;
-    @apply hover:border-rose-400 hover:bg-rose-500/10 hover:text-rose-200 active:scale-[0.98];
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg;
-  }
-
-  .card {
-    @apply rounded-card border border-dark-border/90 bg-dark-card p-6 shadow-card transition duration-200;
-    @apply hover:border-neon-blue/35 hover:shadow-card-hover;
-  }
-
-  /* Feature / benefit tiles — equal height, calm hover */
-  .feature-card {
-    @apply flex h-full min-h-[12.5rem] flex-col rounded-card border border-dark-border bg-gradient-to-b from-dark-surface/90 to-dark-card p-7 text-center shadow-card transition duration-200 sm:p-8;
-    @apply hover:-translate-y-0.5 hover:border-neon-blue/40 hover:shadow-card-hover;
-  }
-
-  .feature-card__icon {
-    @apply mx-auto mb-5 flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-neon-blue/25 bg-neon-blue/[0.09] text-neon-blue transition duration-200;
-  }
-
-  .group:hover .feature-card__icon {
-    @apply border-neon-blue/45 bg-neon-blue/[0.14];
-  }
-
-  .feature-card__title {
-    @apply mb-3 text-lg font-semibold tracking-tight text-ink;
-  }
-
-  .feature-card__body {
-    @apply flex-1 text-base leading-relaxed text-ink-subtle;
-  }
-
-  /* Bottom-of-page CTAs */
-  .cta-panel {
-    @apply relative overflow-hidden rounded-card border border-dark-border px-6 py-10 text-center shadow-card sm:px-10 sm:py-11 md:px-12 md:py-12;
-  }
-
-  .cta-panel::before {
-    content: '';
-    @apply pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-neon-blue/50 to-transparent sm:inset-x-12;
-  }
-
-  .cta-panel-accent {
-    @apply border-neon-blue/25 bg-gradient-to-br from-neon-blue/[0.09] via-dark-card to-neon-purple/[0.07];
-  }
-
-  /* Inline highlight block (e.g. sidebar on About) */
-  .highlight-panel {
-    @apply rounded-card border border-neon-blue/25 bg-gradient-to-br from-neon-blue/[0.08] via-dark-card to-neon-purple/[0.06] p-8 shadow-card md:p-9;
-  }
-
-  .cta-panel__actions {
-    @apply flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4;
-  }
-
-  /* FAQ / accordion rows */
-  .accordion-card {
-    @apply overflow-hidden rounded-card border border-dark-border/95 bg-gradient-to-b from-dark-surface/50 to-dark-card shadow-card transition duration-200;
-    @apply hover:border-dark-border hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.45)];
-  }
-
-  /* Browse grids (e.g. languages) */
-  .content-card {
-    @apply flex h-full flex-col rounded-card border border-dark-border/95 bg-gradient-to-b from-dark-surface/70 to-dark-card p-6 shadow-card transition duration-200 md:p-7;
-    @apply hover:border-neon-blue/40 hover:shadow-card-hover;
-  }
-
-  /* Languages search */
-  .search-shell {
-    @apply relative overflow-hidden rounded-btn border border-dark-border/90 bg-gradient-to-b from-dark-surface/90 to-dark-card shadow-card transition duration-200;
-  }
-
-  .search-shell:focus-within {
-    @apply border-neon-blue/45 ring-1 ring-neon-blue/25;
-  }
-
-  /* Lesson hub list rows — same family as content-card */
-  .lesson-card {
-    @apply rounded-card border border-dark-border/95 bg-gradient-to-b from-dark-surface/70 to-dark-card p-5 shadow-card transition duration-200 sm:p-6 md:p-7;
-    @apply hover:border-neon-blue/40 hover:shadow-card-hover;
-  }
-
-  /* Progress stats strip */
-  .stat-slab {
-    @apply flex flex-col rounded-card border border-dark-border/90 bg-gradient-to-b from-dark-surface/85 to-dark-card p-4 text-center shadow-card sm:p-5 sm:text-left;
-  }
-
-  .stat-slab__icon {
-    @apply mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg border border-neon-blue/25 bg-neon-blue/[0.08] text-neon-blue sm:mx-0;
-  }
-
-  .stat-slab__icon--muted {
-    @apply border-neon-purple/25 bg-neon-purple/[0.08] text-neon-purple;
-  }
-
-  /* Difficulty filters / badges */
-  .filter-tab {
-    @apply inline-flex min-h-[44px] w-full items-center justify-center rounded-btn border px-3 text-center text-sm font-medium transition duration-200 sm:w-auto sm:px-4;
-  }
-
-  .badge-diff-beginner {
-    @apply inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold tracking-tight text-emerald-200/95;
-  }
-
-  .badge-diff-intermediate {
-    @apply inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold tracking-tight text-amber-100/95;
-  }
-
-  .badge-diff-advanced {
-    @apply inline-flex items-center rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-0.5 text-xs font-semibold tracking-tight text-rose-200/95;
-  }
-
-  .concept-chip {
-    @apply inline-flex items-center rounded-md border border-dark-border/90 bg-dark-bg/90 px-2 py-1 text-xs font-medium text-ink-muted;
-  }
-
-  .empty-state-panel {
-    @apply mx-auto max-w-md rounded-card border border-dashed border-dark-border/80 bg-dark-surface/40 px-6 py-10 text-center sm:px-8;
-  }
-
-  .text-gradient {
-    @apply bg-gradient-to-r from-cyan-300 via-neon-blue to-neon-purple bg-clip-text text-transparent;
-  }
-
-  .glow {
-    @apply shadow-lg shadow-neon-blue/20;
-  }
-
-  .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-blue focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg;
+  .scroll-x {
+    @apply overflow-x-auto;
+    scrollbar-width: thin;
   }
 }
 
-/* Particle animation background */
-.particles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: -1;
+/* Typing surface character states. Errors use underline and background, not color alone. */
+.ch-pending {
+  color: rgb(var(--fg-subtle));
+}
+.ch-correct {
+  color: rgb(var(--fg));
+}
+.ch-error {
+  color: rgb(var(--err));
+  background: rgb(var(--err) / 0.16);
+  text-decoration: underline wavy rgb(var(--err));
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  border-radius: 2px;
+}
+.ch-ws-error {
+  background: rgb(var(--err) / 0.38);
+  border-radius: 2px;
+}
+.ch-ws {
+  color: rgb(var(--fg-subtle) / 0.55);
+}
+.caret-bar {
+  box-shadow: inset 2px 0 0 0 rgb(var(--accent));
+}
+.caret-underline {
+  box-shadow: inset 0 -2px 0 0 rgb(var(--accent));
+}
+.caret-block {
+  background: rgb(var(--accent) / 0.32);
+  color: rgb(var(--fg));
+  border-radius: 2px;
+}
+.caret-blink {
+  animation: caret-blink 1.05s step-end infinite;
+}
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.25;
+  }
 }
 
-.particle {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: #22d3ee;
-  border-radius: 50%;
-  animation: float 6s ease-in-out infinite;
-  opacity: 0.35;
-}
-
-.particle:nth-child(odd) {
-  animation-delay: -2s;
-  background: #a78bfa;
-}
-
-.particle:nth-child(3n) {
-  animation-delay: -4s;
-  background: #22d3ee;
-}
-
-/* Syntax highlighting overrides */
-.syntax-highlighter {
-  background: #14151c !important;
-  border-radius: 0.75rem !important;
-  padding: 1.5rem !important;
-  font-size: 0.9rem !important;
-  line-height: 1.65 !important;
-  border: 1px solid rgba(42, 46, 58, 0.9) !important;
-}
-
-/* Mobile menu animations */
-.mobile-menu-enter {
-  transform: translateX(-100%);
-}
-
-.mobile-menu-enter-active {
-  transform: translateX(0);
-  transition: transform 300ms ease-out;
-}
-
-.mobile-menu-exit {
-  transform: translateX(0);
-}
-
-.mobile-menu-exit-active {
-  transform: translateX(-100%);
-  transition: transform 300ms ease-in;
-}
-
-/* Monaco Editor custom styles */
-.monaco-editor .error-highlight {
-  background-color: rgba(244, 71, 71, 0.2) !important;
-  border-bottom: 2px solid #f44747 !important;
-}
-
-.monaco-editor .error-glyph {
-  background-color: #f44747 !important;
-}
-
-.monaco-editor .view-overlays .current-line {
-  border: 1px solid #22d3ee !important;
-  background-color: rgba(34, 211, 238, 0.08) !important;
-}
-
-.monaco-editor .margin-view-overlays .current-line-margin {
-  border-left: 2px solid #22d3ee !important;
-  background-color: rgba(34, 211, 238, 0.08) !important;
-}
+/* Syntax tokens for command blocks and terminals. */
+.tok-cmd { color: rgb(125 211 252); }
+.tok-flag { color: rgb(196 181 253); }
+.tok-str { color: rgb(134 239 172); }
+.tok-num { color: rgb(253 186 116); }
+.tok-op { color: rgb(244 114 182); }
+.tok-var { color: rgb(252 211 77); }
+.tok-com { color: rgb(130 142 164); font-style: italic; }
+[data-theme='light'] .tok-cmd { color: rgb(3 105 161); }
+[data-theme='light'] .tok-flag { color: rgb(109 40 217); }
+[data-theme='light'] .tok-str { color: rgb(21 128 61); }
+[data-theme='light'] .tok-num { color: rgb(194 65 12); }
+[data-theme='light'] .tok-op { color: rgb(190 24 93); }
+[data-theme='light'] .tok-var { color: rgb(146 84 6); }
+[data-theme='light'] .tok-com { color: rgb(90 100 120); }
+/* Terminals are dark in both themes, so they keep the dark token colors. */
+[data-theme='light'] .terminal .tok-cmd { color: rgb(125 211 252); }
+[data-theme='light'] .terminal .tok-flag { color: rgb(196 181 253); }
+[data-theme='light'] .terminal .tok-str { color: rgb(134 239 172); }
+[data-theme='light'] .terminal .tok-num { color: rgb(253 186 116); }
+[data-theme='light'] .terminal .tok-op { color: rgb(244 114 182); }
+[data-theme='light'] .terminal .tok-var { color: rgb(252 211 77); }
+[data-theme='light'] .terminal .tok-com { color: rgb(130 142 164); }

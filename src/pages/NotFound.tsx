@@ -1,59 +1,28 @@
-import { motion, useReducedMotion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { Home, ArrowLeft } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
+import { ButtonLink } from '../components/ui'
+import { usePageMeta } from '../app/context'
+import { SearchPanel } from '../app/SearchPanel'
 
-const NotFound = () => {
-  const reduceMotion = useReducedMotion()
-
+export default function NotFound() {
+  const loc = useLocation()
+  usePageMeta('Page not found')
+  const guess = loc.pathname.split('/').filter(Boolean).pop()?.replace(/[-_.]/g, ' ') ?? ''
   return (
-    <motion.div
-      className="page-shell flex items-center justify-center"
-      initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: reduceMotion ? 0.15 : 0.4, ease: 'easeOut' }}
-    >
-      <div className="mx-auto max-w-md px-2 text-center">
-        <motion.div
-          className="mb-6 text-8xl font-bold text-gradient"
-          animate={
-            reduceMotion
-              ? undefined
-              : { scale: [1, 1.06, 1] }
-          }
-          transition={
-            reduceMotion
-              ? undefined
-              : { duration: 2.5, repeat: Infinity, ease: 'easeInOut' }
-          }
-        >
-          404
-        </motion.div>
-        
-        <h1 className="heading-section mb-4">
-          Page Not Found
-        </h1>
-        
-        <p className="body-prose mb-8 text-ink-subtle">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link to="/" className="btn-primary flex min-h-[44px] items-center justify-center">
-            <Home className="w-4 h-4 mr-2" />
-            Go Home
-          </Link>
-          <button
-            type="button"
-            onClick={() => window.history.back()}
-            className="btn-secondary flex min-h-[44px] items-center justify-center"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Go Back
-          </button>
-        </div>
+    <div className="page max-w-3xl">
+      <p className="font-mono text-sm text-accent">404</p>
+      <h1 className="mt-2 text-h1">This page does not exist</h1>
+      <p className="lead mt-3">
+        Nothing lives at <code className="code-inline">{loc.pathname}</code>. It may have moved in CodeRush 2. Search for what you were looking for, or start from a hub.
+      </p>
+      <div className="mt-6 flex flex-wrap gap-2">
+        <ButtonLink to="/">Home</ButtonLink>
+        <ButtonLink to="/learn" variant="secondary">Learning paths</ButtonLink>
+        <ButtonLink to="/lab" variant="secondary">Command Lab</ButtonLink>
+        <ButtonLink to="/practice" variant="secondary">Typing practice</ButtonLink>
       </div>
-    </motion.div>
+      <div className="mt-10">
+        <SearchPanel initial={guess} autoFocus={false} />
+      </div>
+    </div>
   )
 }
-
-export default NotFound

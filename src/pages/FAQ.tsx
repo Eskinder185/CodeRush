@@ -1,192 +1,52 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, HelpCircle, Code, Zap, Users } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
+import { PageHeader } from '../components/ui'
+import { usePageMeta } from '../app/context'
+import { REPO_URL } from '../app/Footer'
+import { languageTracks } from '../content/code'
+import { commands } from '../content/commands'
 
-interface FAQItem {
-  id: number
-  question: string
-  answer: string
-  icon: React.ReactNode
-}
-
-const FAQ = () => {
-  const [openItems, setOpenItems] = useState<number[]>([0]) // First item open by default
-
-  const faqData: FAQItem[] = [
-    {
-      id: 0,
-      question: "What is CodeRush?",
-      answer: "CodeRush is a typing practice platform specifically designed for developers. Unlike traditional typing tests that use random text, CodeRush uses real code snippets from popular programming languages. This helps developers build muscle memory for programming syntax, improve their coding speed, and enhance their overall productivity when writing code.",
-      icon: <HelpCircle className="w-6 h-6" />
-    },
-    {
-      id: 1,
-      question: "How does it work?",
-      answer: "CodeRush presents you with real code snippets from various programming languages. You type the code exactly as shown, and the platform tracks your typing speed, accuracy, and progress over time. The system provides immediate feedback on your performance and helps you identify areas for improvement. You can practice with different difficulty levels and various programming languages to build comprehensive coding skills.",
-      icon: <Code className="w-6 h-6" />
-    },
-    {
-      id: 2,
-      question: "Can I contribute code snippets?",
-      answer: "Absolutely! CodeRush is an open-source project that welcomes contributions from the developer community. You can contribute code snippets by submitting pull requests to our GitHub repository. We're always looking for high-quality, real-world code examples that can help other developers improve their typing skills. Check out our contribution guidelines on GitHub to get started.",
-      icon: <Users className="w-6 h-6" />
-    },
-    {
-      id: 3,
-      question: "Which programming languages are supported?",
-      answer: "CodeRush currently supports Python, JavaScript, TypeScript, Go, Rust, Java, C++, and many more popular programming languages. We're constantly adding new languages based on community demand. Each language includes various difficulty levels and real-world code patterns to help you master the syntax and common programming structures.",
-      icon: <Zap className="w-6 h-6" />
-    },
-    {
-      id: 4,
-      question: "Is CodeRush free to use?",
-      answer: "Yes, CodeRush is completely free and open-source! We believe that learning and improving coding skills should be accessible to everyone. The platform is funded by community donations and sponsorships. All features are available at no cost, and we're committed to keeping it that way.",
-      icon: <HelpCircle className="w-6 h-6" />
-    },
-    {
-      id: 5,
-      question: "How can I track my progress?",
-      answer: "CodeRush provides detailed statistics including your typing speed (WPM), accuracy percentage, time spent practicing, and progress over time. You can view your performance history, identify your strengths and weaknesses, and set personal goals. The platform also offers achievements and milestones to keep you motivated on your coding journey.",
-      icon: <Zap className="w-6 h-6" />
-    }
+export default function FAQ() {
+  usePageMeta('FAQ', 'Answers about CodeRush: accounts, data, supported languages, the Command Lab, scoring, and mobile use.')
+  const [open, setOpen] = useState<number | null>(0)
+  const items: [string, string][] = [
+    ['Do I need an account?', 'No. Everything works without signing up. Your progress is saved in this browser.'],
+    ['Where is my progress stored? Will it sync?', 'Only in this browser’s local storage. It does not sync between devices or browsers. Use Export on the Progress page to back it up, and Import to restore it elsewhere.'],
+    ['Which programming languages are included?', `${languageTracks.map((t) => t.languageName).join(', ')}.`],
+    ['Which command platforms are included?', `Linux (Bash), Windows PowerShell, Windows Command Prompt networking tools, and Cisco IOS show commands: ${commands.length} exercises in total.`],
+    ['Does the Command Lab run real commands?', 'No. It is a simulation. Your input is compared with the expected answers and curated sample output is shown. Nothing is executed. Practice real commands only on systems you are authorized to use, such as your own virtual machine.'],
+    ['How is WPM calculated?', 'Net WPM is correct characters divided by five, per minute of active typing. Raw WPM counts all keystrokes, including corrected ones. Paused time is excluded.'],
+    ['Why can I not paste into the typing area?', 'Pasting would inflate scores and skip the practice itself. Custom Practice lets you paste text into a separate source box, and you then type it.'],
+    ['Why did my lesson not count as completed?', 'A lesson passes only when your final text matches exactly. If characters were still wrong when you reached the end, it is recorded as an attempt so you can see your speed, but it does not count as passed.'],
+    ['How does Tab work while typing?', 'When the next characters are indentation, Tab fills them. Otherwise Tab moves focus as usual, so keyboard navigation keeps working. In Forgiving mode, indentation after Enter is filled automatically and not counted as typed.'],
+    ['Can I use CodeRush on my phone?', 'Yes. Lessons, quizzes, scenarios, and the terminal work on phones, with on-screen symbol keys for characters like | and {. A physical keyboard gives the most accurate speed results.'],
+    ['Is my 1.x progress kept?', 'Yes. CodeRush 2 reads your saved 1.x sessions and migrates them automatically. The original data is left in place as a backup.'],
+    ['How do I report a mistake or request a feature?', `Open an issue on GitHub: ${REPO_URL}/issues.`],
   ]
-
-  const toggleItem = (id: number) => {
-    setOpenItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
-    )
-  }
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
-  }
-
   return (
-    <motion.div
-      className="page-shell"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <div className="page-inner-narrow">
-        {/* Header */}
-        <motion.div
-          className="section-head max-w-3xl md:mx-auto"
-          variants={itemVariants}
-        >
-          <h1 className="heading-page mb-0 px-2">
-            Frequently Asked <span className="text-gradient">Questions</span>
-          </h1>
-          <div className="section-rule" aria-hidden />
-          <p className="body-lead mx-auto mt-5 max-w-2xl text-ink-subtle md:mt-6">
-            Everything you need to know about CodeRush and how to get the most out of your coding practice.
-          </p>
-        </motion.div>
-
-        {/* FAQ Items */}
-        <motion.div
-          className="space-y-3 sm:space-y-4"
-          variants={itemVariants}
-        >
-          {faqData.map((item) => (
-            <motion.div
-              key={item.id}
-              className="accordion-card"
-            >
+    <div className="page max-w-3xl">
+      <PageHeader eyebrow="Help" title="Frequently asked questions" />
+      <div className="divide-y divide-line rounded-lg border border-line bg-surface">
+        {items.map(([q, a], i) => (
+          <div key={q}>
+            <h2>
               <button
                 type="button"
-                onClick={() => toggleItem(item.id)}
-                className="focus-ring w-full px-5 py-5 text-left sm:px-6 sm:py-5"
+                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-medium hover:bg-elevated"
+                aria-expanded={open === i}
+                aria-controls={`faq-${i}`}
+                onClick={() => setOpen(open === i ? null : i)}
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex min-w-0 flex-1 items-start gap-4">
-                    <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-neon-blue/25 bg-neon-blue/[0.08] text-neon-blue [&_svg]:h-5 [&_svg]:w-5">
-                      {item.icon}
-                    </div>
-                    <h3 className="text-lg font-semibold leading-snug tracking-tight text-ink sm:text-xl">
-                      {item.question}
-                    </h3>
-                  </div>
-                  <motion.div
-                    animate={{ rotate: openItems.includes(item.id) ? 180 : 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="mt-1 shrink-0 text-ink-subtle"
-                  >
-                    <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6" />
-                  </motion.div>
-                </div>
+                {q}
+                <ChevronDown className={`h-4 w-4 shrink-0 text-fg-subtle transition-transform ${open === i ? 'rotate-180' : ''}`} aria-hidden />
               </button>
-              
-              <AnimatePresence>
-                {openItems.includes(item.id) && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="overflow-hidden"
-                  >
-                    <div className="border-t border-dark-border/80 px-5 pb-5 sm:px-6 sm:pb-6">
-                      <div className="pt-4">
-                        <p className="body-prose pl-[3.75rem] text-ink-muted sm:pl-16">
-                          {item.answer}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Contact Section */}
-        <motion.div
-          className="section-divide text-center"
-          variants={itemVariants}
-        >
-          <div className="cta-panel cta-panel-accent">
-            <h2 className="heading-section mb-4 px-2 pt-1">
-              Still Have Questions?
             </h2>
-            <p className="body-prose mx-auto mb-8 max-w-2xl text-ink-muted">
-              Can't find the answer you're looking for? We'd love to hear from you! 
-              Reach out to us through our GitHub repository or join our community discussions.
-            </p>
-            <div className="cta-panel__actions">
-              <button type="button" className="btn-primary justify-center px-8 py-3.5 text-base sm:min-w-[10rem] sm:text-lg">
-                Visit GitHub
-              </button>
-              <button type="button" className="btn-secondary justify-center px-8 py-3.5 text-base sm:min-w-[10rem] sm:text-lg">
-                Join Community
-              </button>
+            <div id={`faq-${i}`} hidden={open !== i} className="px-5 pb-4 text-sm leading-relaxed text-fg-muted">
+              {a}
             </div>
           </div>
-        </motion.div>
+        ))}
       </div>
-    </motion.div>
+    </div>
   )
 }
-
-export default FAQ

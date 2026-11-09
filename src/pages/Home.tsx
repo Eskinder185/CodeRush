@@ -1,217 +1,329 @@
-import { motion } from 'framer-motion'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Code, Zap, Target } from 'lucide-react'
+import { ArrowRight, Check, RotateCcw, Timer, Sparkles, CalendarDays, PlayCircle } from 'lucide-react'
+import { ButtonLink, ProgressBar, Button } from '../components/ui'
+import { usePageMeta } from '../app/context'
+import { useAppData, localDateKey } from '../lib/storage/store'
+import { learningPaths } from '../content/paths'
+import { commands } from '../content/commands'
+import { scenarios } from '../content/scenarios'
+import { codeLessonCount, languageTracks } from '../content/code'
+import { pathProgress } from '../lib/mastery'
+import { overallStats } from '../lib/progress'
+import { dailyChallenge, dailyStreak } from '../lib/daily'
+import { useTypingSession } from '../components/typing/useTypingSession'
+import { TypingSurface, type TypingSurfaceHandle } from '../components/typing/TypingSurface'
+import { FlowSteps, PathIcon, TerminalVisual, SecurityVisual, HeroBackdrop, CodePanel, ACCENTS } from '../components/graphics/Graphics'
+import { NetworkTopology } from '../components/graphics/NetworkTopology'
 
-const Home = () => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
-      },
-    },
+const DEMO = `def greet(name):
+    return f"Hello, {name}!"`
+
+function HeroDemo() {
+  const ref = useRef<TypingSurfaceHandle>(null)
+  const [done, setDone] = useState(false)
+  const s = useTypingSession({ target: DEMO, onFinish: () => setDone(true) })
+  return (
+    <div className="relative">
+      <CodePanel className="absolute -right-6 -top-10 hidden w-[24rem] rotate-[2deg] opacity-60 lg:block [[data-theme=light]_&]:opacity-25" />
+      <div className="relative rounded-xl border border-line-strong bg-surface/90 p-4 shadow-e3 backdrop-blur sm:p-5">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-fg">Try it now</p>
+            <p className="text-xs text-fg-subtle">Type the Python below. Enter moves to the next line.</p>
+          </div>
+          <dl className="flex gap-4 text-right">
+            <div>
+              <dt className="text-2xs uppercase tracking-wider text-fg-subtle">WPM</dt>
+              <dd className="font-mono text-lg font-semibold tabular-nums">{s.metrics.wpm}</dd>
+            </div>
+            <div>
+              <dt className="text-2xs uppercase tracking-wider text-fg-subtle">Accuracy</dt>
+              <dd className="font-mono text-lg font-semibold tabular-nums">{s.metrics.accuracy}%</dd>
+            </div>
+          </dl>
+        </div>
+        <TypingSurface ref={ref} session={s} label="Homepage typing demo" languageLabel="greet.py" maxHeightClass="max-h-40" />
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {done ? (
+            <span className="inline-flex items-center gap-1.5 text-sm text-ok">
+              <Check className="h-4 w-4" aria-hidden /> {s.metrics.perfect ? 'Perfect.' : 'Done.'} {s.metrics.wpm} WPM at {s.metrics.accuracy}% accuracy.
+            </span>
+          ) : (
+            <Button size="sm" onClick={() => ref.current?.focus()}>
+              <PlayCircle className="h-4 w-4" aria-hidden /> Start
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              s.reset()
+              setDone(false)
+              ref.current?.focus()
+            }}
+          >
+            <RotateCcw className="h-4 w-4" aria-hidden /> Reset
+          </Button>
+          <Link to="/practice" className="ml-auto inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline">
+            Full practice <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Personal() {
+  const data = useAppData()
+  const stats = overallStats(data)
+  const today = localDateKey()
+  const streak = dailyStreak(data, today)
+  const active = learningPaths
+    .map((p) => ({ p, prog: pathProgress(p, data) }))
+    .filter((x) => x.prog.inProgress > 0 || x.prog.completed > 0)
+    .sort((a, b) => b.prog.percent - a.prog.percent)[0]
+  const last = data.sessions.at(-1)
+  const hasActivity = data.sessions.length > 0 || !!data.lastVisited
+
+  if (!hasActivity) {
+    return (
+      <div className="panel panel-pad flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="eyebrow">New here?</p>
+          <h2 className="mt-1 text-h3">Start with Linux terminal basics or your first Python lesson.</h2>
+          <p className="mt-1 text-sm text-fg-subtle">No account needed. Progress saves in this browser automatically.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <ButtonLink to="/learn/linux/linux.navigation">Linux basics</ButtonLink>
+          <ButtonLink to="/languages/python/lesson/python-basics-1" variant="secondary">
+            First Python lesson
+          </ButtonLink>
+        </div>
+      </div>
+    )
   }
+  return (
+    <div className="grid gap-4 md:grid-cols-3">
+      {data.lastVisited && (
+        <Link to={data.lastVisited.path} className="panel panel-pad interactive group">
+          <p className="text-xs font-medium text-fg-subtle">Continue where you left off</p>
+          <p className="mt-1 truncate font-semibold text-fg">{data.lastVisited.title}</p>
+          <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-accent">
+            Resume <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+          </span>
+        </Link>
+      )}
+      <div className="panel panel-pad">
+        <p className="text-xs font-medium text-fg-subtle">Recent typing</p>
+        {last ? (
+          <p className="mt-1 text-fg">
+            <span className="text-2xl font-semibold">{last.wpm}</span> WPM at {last.accuracy}% accuracy
+          </p>
+        ) : (
+          <p className="mt-1 text-fg-muted">No typing sessions yet.</p>
+        )}
+        <p className="mt-2 text-sm text-fg-subtle">
+          {stats.lessonsPassed} lesson{stats.lessonsPassed === 1 ? '' : 's'} passed · Daily streak {streak}
+        </p>
+      </div>
+      {active ? (
+        <Link to={`/learn/${active.p.id}${active.prog.nextModuleId ? `/${active.prog.nextModuleId}` : ''}`} className="panel panel-pad interactive">
+          <p className="text-xs font-medium text-fg-subtle">Current path</p>
+          <p className="mt-1 font-semibold text-fg">{active.p.title}</p>
+          <div className="mt-3">
+            <ProgressBar value={active.prog.percent} label={`${active.p.title} progress`} />
+          </div>
+          <p className="mt-2 text-sm text-fg-subtle">
+            {active.prog.completed} of {active.prog.total} modules complete. Next milestone: {active.prog.completed + 1} modules.
+          </p>
+        </Link>
+      ) : (
+        <Link to="/learn" className="panel panel-pad interactive">
+          <p className="text-xs font-medium text-fg-subtle">Pick a learning path</p>
+          <p className="mt-1 font-semibold text-fg">Eight structured paths, from Python to incident triage.</p>
+        </Link>
+      )}
+    </div>
+  )
+}
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.45,
-        ease: "easeOut",
-      },
-    },
-  }
+export default function Home() {
+  usePageMeta('', 'Build typing speed, learn programming syntax, and practice the commands used by developers, network engineers, and cybersecurity professionals.')
+  const counts = useMemo(() => {
+    const by = (p: string) => commands.filter((c) => c.platform === p).length
+    return { linux: by('linux'), ps: by('powershell'), win: by('windows-cmd'), ios: by('cisco-ios') }
+  }, [])
+  const daily = dailyChallenge(localDateKey())
+  const path = (id: string) => learningPaths.find((p) => p.id === id)!
 
-  const heroVisualVariants = {
-    hidden: { opacity: 0, y: 16 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: "easeOut", delay: 0.2 },
-    },
-  }
-
-  const features = [
+  const cards = [
+    { p: path('programming'), stat: `${codeLessonCount} lessons in ${languageTracks.length} languages`, to: '/learn/programming' },
+    { p: path('linux'), stat: `${path('linux').modules.length} modules · ${counts.linux} Linux commands overall`, to: '/learn/linux' },
+    { p: path('powershell'), stat: `${path('powershell').modules.length} modules · ${counts.ps} PowerShell commands`, to: '/learn/powershell' },
+    { p: path('networking'), stat: `${path('networking').modules.length} modules · ${counts.win} Windows and ${counts.ios} Cisco IOS commands`, to: '/learn/networking' },
+    { p: path('cybersecurity'), stat: `${path('cybersecurity').modules.length} modules · ${scenarios.filter((s) => s.track === 'security').length} security scenarios`, to: '/learn/cybersecurity' },
     {
-      icon: <Code className="w-8 h-8" />,
-      title: "Structured Lessons",
-      description: "Learn with beginner, intermediate, and advanced lessons for each programming language."
+      p: { ...path('linux-networking'), title: 'Command Line Mastery', tagline: 'The Command Lab: search, type, recall, troubleshoot.', accent: 'amber' as const, icon: 'terminal' as const },
+      stat: `${commands.length} command exercises · ${scenarios.length} scenarios`,
+      to: '/lab',
     },
-    {
-      icon: <Zap className="w-8 h-8" />,
-      title: "Free Practice Mode",
-      description: "Customizable practice sessions with random code snippets and flexible settings."
-    },
-    {
-      icon: <Target className="w-8 h-8" />,
-      title: "Progress Tracking",
-      description: "Monitor your improvement with detailed statistics, achievements, and performance metrics."
-    }
   ]
 
   return (
-    <motion.div
-      className="min-h-screen w-full pt-20"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Hero Section */}
-      <section className="relative isolate flex min-h-[calc(100vh-5rem)] items-center px-4 pb-20 pt-6 sm:min-h-[calc(100dvh-5rem)] sm:px-6 sm:pb-24 sm:pt-8 lg:px-8 lg:pb-28">
-        {/* Ambient depth — single layer, no animation */}
-        <div
-          className="pointer-events-none absolute inset-0 -z-10"
-          aria-hidden
-        >
-          <div className="absolute left-1/2 top-[12%] h-[min(42rem,85vh)] w-[min(56rem,100vw)] -translate-x-1/2 rounded-full bg-gradient-to-b from-neon-blue/[0.12] via-neon-purple/[0.06] to-transparent blur-3xl" />
-          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-dark-bg sm:h-40" />
-        </div>
-
-        <div className="relative mx-auto w-full max-w-page">
-          <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_min(20rem,34%)] lg:gap-14 xl:gap-20">
-            {/* Copy column */}
-            <div className="text-center lg:max-w-none lg:text-left">
-              <motion.p
-                className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-neon-blue/90 sm:mb-5 sm:text-sm sm:tracking-[0.22em]"
-                variants={itemVariants}
-              >
-                <span className="text-gradient">CodeRush</span>
-              </motion.p>
-
-              <motion.h1
-                className="mx-auto max-w-[min(100%,20rem)] text-balance text-display font-bold tracking-tight text-ink sm:max-w-xl md:max-w-2xl lg:mx-0 lg:max-w-[28rem]"
-                variants={itemVariants}
-              >
-                Practice typing real code, faster.
-              </motion.h1>
-
-              <motion.p
-                className="body-prose mx-auto mt-6 max-w-md text-ink-subtle sm:mt-7 sm:max-w-lg lg:mx-0 lg:max-w-xl"
-                variants={itemVariants}
-              >
-                Master the art of coding by practicing with real-world code snippets. Improve your typing
-                speed, accuracy, and muscle memory for programming languages.
-              </motion.p>
-
-              <motion.div
-                className="mt-9 flex w-full max-w-md flex-col gap-3 sm:mt-10 sm:max-w-none sm:flex-row sm:items-center sm:gap-4 lg:mx-0"
-                variants={itemVariants}
-              >
-                <Link
-                  to="/languages"
-                  className="btn-primary order-1 w-full justify-center px-8 py-3.5 text-base sm:w-auto sm:min-w-[12.5rem] sm:py-4 sm:text-lg"
-                >
-                  Start Practicing
-                  <ArrowRight className="ml-2 inline-block h-5 w-5 shrink-0" aria-hidden />
-                </Link>
-                <Link
-                  to="/about"
-                  className="btn-secondary order-2 w-full justify-center px-8 py-3.5 text-base sm:w-auto sm:py-4 sm:text-lg"
-                >
-                  Learn More
-                </Link>
-              </motion.div>
+    <div>
+      <section className="relative isolate overflow-hidden pt-28 sm:pt-32">
+        <HeroBackdrop />
+        <div className="mx-auto grid max-w-page items-center gap-12 px-4 pb-16 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:px-8 lg:pb-24">
+          <div>
+            <p className="eyebrow">Typing · Learning · Command Lab</p>
+            <h1 className="mt-4 text-display text-fg">
+              Master the Keyboard.
+              <br />
+              <span className="bg-gradient-to-r from-[#38BDF8] to-[#8B5CF6] bg-clip-text text-transparent">Master the Code.</span>
+            </h1>
+            <p className="lead mt-6 max-w-xl">
+              Build typing speed, learn programming syntax, and practice the commands used by developers, network engineers, and cybersecurity professionals, all in one interactive learning experience.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <ButtonLink to="/learn" size="lg">
+                Start Learning <ArrowRight className="h-5 w-5" aria-hidden />
+              </ButtonLink>
+              <ButtonLink to="/practice?mode=timed&duration=30" size="lg" variant="secondary">
+                <Timer className="h-5 w-5" aria-hidden /> Quick Typing Test
+              </ButtonLink>
             </div>
-
-            {/* Supporting visual — static, desktop + large tablet */}
-            <motion.div
-              className="mx-auto hidden w-full max-w-sm md:block lg:max-w-none"
-              variants={heroVisualVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              <div className="relative rounded-card border border-dark-border/90 bg-dark-surface/90 p-1 shadow-card backdrop-blur-sm">
-                <div className="flex items-center gap-2 border-b border-dark-border/80 px-4 py-3">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" aria-hidden />
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400/70" aria-hidden />
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" aria-hidden />
-                  <span className="ml-2 font-mono text-[10px] text-ink-faint sm:text-xs">
-                    practice.py
-                  </span>
-                </div>
-                <pre className="overflow-x-auto p-4 text-left font-mono text-[11px] leading-relaxed text-ink-muted sm:text-xs">
-                  <span className="text-neon-purple">def </span>
-                  <span className="text-neon-blue">rush</span>
-                  <span className="text-ink-muted">():</span>
-                  {'\n    '}
-                  <span className="text-neon-purple">return </span>
-                  <span className="text-emerald-400/90">&quot;wpm ↑&quot;</span>
-                </pre>
-                <div className="pointer-events-none absolute -inset-px -z-10 rounded-[inherit] bg-gradient-to-br from-neon-blue/15 via-transparent to-neon-purple/10 opacity-80" aria-hidden />
-              </div>
-            </motion.div>
+            <ul className="mt-8 grid max-w-lg grid-cols-2 gap-x-6 gap-y-2 text-sm text-fg-muted">
+              {['Free to start', 'No account required for local practice', 'Multiple learning paths', 'Live typing feedback'].map((x) => (
+                <li key={x} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 shrink-0 text-ok" aria-hidden /> {x}
+                </li>
+              ))}
+            </ul>
           </div>
+          <HeroDemo />
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="section-block section-flow px-4 sm:px-6 lg:px-8">
-        <div className="page-inner">
-          <motion.div
-            className="section-head max-w-3xl md:mx-auto"
-            variants={itemVariants}
-          >
-            <h2 className="heading-section mb-0 px-2">
-              Why Choose <span className="text-gradient">CodeRush</span>?
-            </h2>
-            <div className="section-rule" aria-hidden />
-            <p className="body-lead mx-auto mt-5 max-w-2xl text-ink-subtle md:mt-6">
-              Built for developers who want to improve their coding efficiency and typing skills.
-            </p>
-          </motion.div>
+      <section className="mx-auto max-w-page px-4 pb-16 sm:px-6 lg:px-8">
+        <Personal />
+      </section>
 
-          <div className="grid auto-rows-fr gap-6 sm:gap-8 md:grid-cols-3">
-            {features.map((feature, index) => (
-              <motion.div key={index} variants={itemVariants}>
-                <div className="group feature-card h-full">
-                  <div className="feature-card__icon [&_svg]:h-7 [&_svg]:w-7">
-                    {feature.icon}
-                  </div>
-                  <h3 className="feature-card__title">{feature.title}</h3>
-                  <p className="feature-card__body">{feature.description}</p>
-                </div>
-              </motion.div>
+      <section className="border-y border-line bg-elevated/40 py-16 sm:py-20">
+        <div className="mx-auto max-w-page px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <p className="eyebrow">Learning paths</p>
+            <h2 className="mt-2 text-h1">One platform, six ways in.</h2>
+            <p className="lead mt-3">Every path pairs plain-English concepts with typing practice, recall checks, and real troubleshooting.</p>
+          </div>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {cards.map(({ p, stat, to }) => (
+              <Link key={p.title} to={to} className="panel group relative flex flex-col overflow-hidden p-6 transition duration-fast hover:-translate-y-0.5 hover:border-line-strong hover:shadow-e2">
+                <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-20 blur-2xl" style={{ background: ACCENTS[p.accent].hex }} aria-hidden />
+                <PathIcon icon={p.icon} accent={p.accent} />
+                <h3 className="mt-4 text-h3">{p.title}</h3>
+                <p className="mt-1 text-sm text-fg-muted">{p.tagline}</p>
+                <p className="mt-4 text-xs font-medium text-fg-subtle">{stat}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent">
+                  Explore <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                </span>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="section-block section-flow-soft px-4 pb-20 sm:px-6 lg:px-8">
-        <div className="page-inner-narrow">
-          <motion.div
-            className="cta-panel cta-panel-accent"
-            variants={itemVariants}
-          >
-            <h2 className="heading-section mb-4 px-2 pt-1">
-              Ready to <span className="text-gradient">Level Up</span> Your Coding?
-            </h2>
-            <p className="body-prose mx-auto mb-8 max-w-xl text-ink-muted md:max-w-2xl">
-              Join thousands of developers who are already improving their coding speed and accuracy.
-            </p>
-            <div className="cta-panel__actions">
-              <Link
-                to="/languages"
-                className="btn-primary justify-center px-8 py-3.5 text-base sm:min-w-[11rem] sm:text-lg"
-              >
-                Choose Your Language
-              </Link>
-              <Link
-                to="/stats"
-                className="btn-secondary justify-center px-8 py-3.5 text-base sm:min-w-[11rem] sm:text-lg"
-              >
-                View Progress
-              </Link>
-            </div>
-          </motion.div>
+      <section className="py-16 sm:py-20">
+        <div className="mx-auto max-w-page px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">How CodeRush works</p>
+            <h2 className="mt-2 text-h1">Learn → Practice → Improve → Master</h2>
+            <p className="lead mt-3">Typing a command correctly is not the same as understanding it. CodeRush measures both.</p>
+          </div>
+          <div className="mt-12">
+            <FlowSteps />
+          </div>
         </div>
       </section>
-    </motion.div>
+
+      <section className="border-y border-line bg-elevated/40 py-16 sm:py-20">
+        <div className="mx-auto grid max-w-page items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+          <div>
+            <p className="eyebrow">CodeRush Command Lab</p>
+            <h2 className="mt-2 text-h1">Learn the commands. Build the muscle memory. Understand the systems.</h2>
+            <p className="lead mt-4">
+              Linux, PowerShell, Windows networking, and Cisco IOS in a safe, clearly labelled simulated terminal. Every command comes with a syntax breakdown, sample output, recall practice, and troubleshooting scenarios.
+            </p>
+            <ul className="mt-6 space-y-2 text-fg-muted">
+              <li className="flex gap-2">
+                <Check className="mt-1 h-4 w-4 shrink-0 text-ok" aria-hidden /> {commands.length} command exercises, each with documentation links
+              </li>
+              <li className="flex gap-2">
+                <Check className="mt-1 h-4 w-4 shrink-0 text-ok" aria-hidden /> {scenarios.length} applied scenarios, from DNS failures to suspicious processes
+              </li>
+              <li className="flex gap-2">
+                <Check className="mt-1 h-4 w-4 shrink-0 text-ok" aria-hidden /> Nothing you type is ever executed
+              </li>
+            </ul>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <ButtonLink to="/lab">Open the Command Lab</ButtonLink>
+              <ButtonLink to="/lab/scenario/sc.linux.dns-fail" variant="secondary">
+                Try a DNS scenario
+              </ButtonLink>
+            </div>
+          </div>
+          <div className="relative pb-0 sm:pb-24">
+            <div className="sm:mr-12">
+              <TerminalVisual variant="linux" />
+            </div>
+            <div className="absolute bottom-0 right-0 hidden w-[80%] sm:block">
+              <TerminalVisual variant="powershell" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 sm:py-20">
+        <div className="mx-auto max-w-page px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+            <div>
+              <p className="eyebrow">Networking</p>
+              <h2 className="mt-2 text-h2">See how a network fits together</h2>
+              <p className="mt-2 max-w-2xl text-fg-muted">Select a device to see its simulated routing table, VLANs, or IP settings.</p>
+              <div className="mt-6">
+                <NetworkTopology compact />
+              </div>
+            </div>
+            <div>
+              <p className="eyebrow">Defensive security</p>
+              <h2 className="mt-2 text-h2">Investigate with real workflows</h2>
+              <p className="mt-2 text-fg-muted">Synthetic logs, reserved addresses, and evidence-first habits. Nothing attacks a real system.</p>
+              <div className="mt-6">
+                <SecurityVisual />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 pb-20 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-page overflow-hidden rounded-xl border border-line bg-gradient-to-br from-accent/10 via-surface to-violet/10 p-8 sm:p-12">
+          <div className="grid items-center gap-8 md:grid-cols-[1fr_auto]">
+            <div>
+              <p className="eyebrow flex items-center gap-2">
+                <CalendarDays className="h-4 w-4" aria-hidden /> Today&rsquo;s challenge
+              </p>
+              <h2 className="mt-2 text-h2">{daily.title}</h2>
+              <p className="mt-2 text-fg-muted">{daily.description} The same challenge for everyone today.</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <ButtonLink to="/challenges" size="lg">
+                <Sparkles className="h-5 w-5" aria-hidden /> Take the challenge
+              </ButtonLink>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   )
 }
-
-export default Home

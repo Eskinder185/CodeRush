@@ -1,0 +1,83 @@
+/*
+ * CodeRush design tokens.
+ * Colors are space-separated RGB so Tailwind can apply alpha, for example bg-accent/10.
+ * Contrast targets: fg on bg at least 15:1, fg-muted at least 7:1, fg-subtle at least 4.5:1.
+ */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: 11 13 18;            /* #0B0D12 page */
+  --elevated: 18 22 32;      /* #121620 raised band, hover */
+  --surface: 23 28 39;       /* #171C27 cards */
+  --sunken: 8 10 14;         /* #080A0E code wells */
+  --line: 38 45 60;          /* #262D3C borders */
+  --line-strong: 58 67 86;   /* #3A4356 hover borders */
+  --fg: 245 247 251;         /* #F5F7FB primary text */
+  --fg-muted: 182 191 207;   /* #B6BFCF secondary text */
+  --fg-subtle: 135 146 166;  /* #8792A6 tertiary text, 4.9:1 on bg */
+  --accent: 56 189 248;      /* #38BDF8 */
+  --accent-fg: 6 18 28;      /* text drawn on accent */
+  --violet: 167 139 250;     /* #A78BFA */
+  --ok: 52 211 153;          /* #34D399 */
+  --warn: 251 191 36;        /* #FBBF24 */
+  --err: 251 113 133;        /* #FB7185 */
+  --term: 7 9 13;
+  --term-fg: 214 222 235;
+
+  --shadow-1: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-2: 0 1px 0 0 rgb(255 255 255 / 0.05) inset, 0 8px 24px -8px rgb(0 0 0 / 0.6);
+  --shadow-3: 0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 24px 60px -16px rgb(0 0 0 / 0.7);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --dur-slow: 320ms;
+
+  --type-font-size: 18px;
+  --type-line-height: 1.7;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: 248 249 252;
+  --elevated: 241 243 248;
+  --surface: 255 255 255;
+  --sunken: 243 245 249;
+  --line: 223 227 236;
+  --line-strong: 190 197 212;
+  --fg: 15 19 28;
+  --fg-muted: 58 66 84;
+  --fg-subtle: 88 98 118;    /* 5.8:1 on bg */
+  --accent: 3 105 161;       /* #0369A1, 5.9:1 on white */
+  --accent-fg: 255 255 255;
+  --violet: 109 40 217;
+  --ok: 4 120 87;
+  --warn: 146 84 6;
+  --err: 190 18 60;
+  --term: 16 20 28;
+  --term-fg: 214 222 235;
+
+  --shadow-1: 0 1px 2px rgb(15 19 28 / 0.06);
+  --shadow-2: 0 8px 24px -10px rgb(15 19 28 / 0.16);
+  --shadow-3: 0 24px 60px -18px rgb(15 19 28 / 0.22);
+}
+
+[data-motion='reduce'] *,
+[data-motion='reduce'] *::before,
+[data-motion='reduce'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='full']) *,
+  :root:not([data-motion='full']) *::before,
+  :root:not([data-motion='full']) *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

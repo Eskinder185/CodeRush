@@ -239,7 +239,7 @@ export default function ModulePage() {
                 </ul>
               </>
             ) : (
-              <p className="mt-4 text-sm text-ok">Module complete. {mastery.status === 'mastered' ? 'Mastered.' : 'Reach 85 to master it.'}</p>
+              <p className="mt-4 text-sm text-ok">Module complete. {mastery.status === 'mastered' ? 'Mastered.' : 'Reach 85 overall and 80% on the quiz, if present, to master it.'}</p>
             )}
             <p className="mt-4 text-2xs text-fg-subtle">
               <Link to="/about#mastery" className="underline-offset-2 hover:underline">How mastery is calculated</Link>

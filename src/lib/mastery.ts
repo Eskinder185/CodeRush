@@ -13,7 +13,8 @@
  * Module mastery combines the parts a module has, reweighted to sum to 100%:
  *   commands or lessons 60%, quiz best score 25%, scenarios completed 15%.
  * A module is complete when its quiz best is at least 50%, every command is practiced or better,
- * every lesson is passed, and every scenario is complete. It is mastered when complete and 85 or more.
+ * every lesson is passed, and every scenario is complete. It is mastered when complete, scoring
+ * 85 or more, and its quiz (if any) has reached 80%. Existing completion stays compatible.
  */
 import type { LearningModule, LearningPath } from '../content/types'
 import type { AppData, CommandProgress } from './storage/schema'
@@ -126,7 +127,7 @@ export function moduleMastery(module: LearningModule, data: AppData): ModuleMast
   const score = Math.round(100 * parts.reduce((s, p) => s + p.weight * p.value, 0))
 
   let status: ModuleStatus = activity ? 'in-progress' : 'not-started'
-  if (remaining.length === 0 && parts.length > 0) status = score >= 85 ? 'mastered' : 'completed'
+  if (remaining.length === 0 && parts.length > 0) status = score >= 85 && (module.quiz.length === 0 || (data.quizzes[module.id]?.best ?? 0) >= 0.8) ? 'mastered' : 'completed'
   return { score, status, parts, remaining }
 }
 

@@ -51,7 +51,7 @@ A module combines the parts it has, reweighted so the weights sum to 100%:
 | Quiz (best score) | 25% |
 | Scenarios (share completed) | 15% |
 
-A module is **complete** when the quiz best is at least 50%, every command is Practiced or Mastered, every lesson is passed, and every scenario is completed. It is **mastered** when complete with a score of 85 or more. Earlier beginner modules that are incomplete are shown as recommendations. They never block access.
+A module is **complete** when the quiz best is at least 50%, every command is Practiced or Mastered, every lesson is passed, and every scenario is completed. It is **mastered** when complete with a score of 85 or more and a quiz best of at least 80% if the module has a quiz. This preserves established completion while requiring stronger evidence for mastery. Earlier beginner modules that are incomplete are shown as recommendations. They never block access.
 
 ## Daily challenge score
 

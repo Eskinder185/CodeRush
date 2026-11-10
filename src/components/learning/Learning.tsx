@@ -98,7 +98,7 @@ export function QuizRunner({ questions, onFinish }: { questions: QuizQuestion[];
         <p className="mt-1 text-2xl font-semibold">
           {correct} of {questions.length} correct ({pct}%)
         </p>
-        <p className="mt-1 text-sm text-fg-muted">{pct >= 50 ? 'That meets the module requirement of 50%.' : 'The module needs at least 50%. Review the concept and try again.'}</p>
+        <p className="mt-1 text-sm text-fg-muted">{pct >= 80 ? 'Strong result. The quiz target for mastery is met.' : pct >= 50 ? 'Module completion is met. Reach 80% to qualify for mastery.' : 'The module needs at least 50%. Review the concept and try again.'}</p>
         <Button
           className="mt-4"
           variant="secondary"

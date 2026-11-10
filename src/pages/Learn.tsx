@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Clock } from 'lucide-react'
-import { PageHeader, ProgressBar, DifficultyBadge } from '../components/ui'
+import { PageHeader, ProgressBar, DifficultyBadge, ButtonLink } from '../components/ui'
 import { PathIcon } from '../components/graphics/Graphics'
 import { usePageMeta } from '../app/context'
 import { learningPaths } from '../content/paths'
@@ -16,6 +16,7 @@ export default function Learn() {
         eyebrow="Learn"
         title="Learning paths"
         lead="Each path runs from beginner to advanced. Modules explain a concept, then you type, recall, and apply it. Every module is open, so experienced learners can jump ahead."
+        actions={<ButtonLink to="/journeys" variant="secondary">Explore career journeys <ArrowRight className="h-4 w-4" aria-hidden /></ButtonLink>}
       />
       <div className="grid gap-5 md:grid-cols-2">
         {learningPaths.map((p) => {

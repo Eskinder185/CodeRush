@@ -13,6 +13,9 @@ import { getStorageError } from './lib/storage/store'
 const SearchDialog = lazy(() => import('./app/SearchPanel'))
 const Home = lazy(() => import('./pages/Home'))
 const Learn = lazy(() => import('./pages/Learn'))
+const Journeys = lazy(() => import('./pages/Journeys'))
+const Today = lazy(() => import('./pages/Today'))
+const Missions = lazy(() => import('./pages/Missions'))
 const PathPage = lazy(() => import('./pages/PathPage'))
 const ModulePage = lazy(() => import('./pages/ModulePage'))
 const CommandLab = lazy(() => import('./pages/CommandLab'))
@@ -129,6 +132,11 @@ function Shell() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/learn" element={<Learn />} />
+                  <Route path="/journeys" element={<Journeys />} />
+                  <Route path="/journeys/:id" element={<Journeys />} />
+                  <Route path="/today" element={<Today />} />
+                  <Route path="/missions" element={<Missions />} />
+                  <Route path="/missions/:id" element={<Missions />} />
                   <Route path="/learn/:pathId" element={<PathPage />} />
                   <Route path="/learn/:pathId/:moduleId" element={<ModulePage />} />
                   <Route path="/lab" element={<CommandLab />} />

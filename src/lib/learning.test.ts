@@ -82,6 +82,15 @@ describe('module mastery and path progress', () => {
     expect(pathProgress(path, d).completed).toBe(1)
   })
 
+  it('keeps 50% quiz completion distinct from 80% mastery', () => {
+    const d = emptyData()
+    d.quizzes[nav.id] = { best: 0.5, last: 0.5, attempts: 1, lastAt: '2026-03-01T00:00:00Z' }
+    for (const id of nav.commandIds) d.commands[id] = { typedBestAccuracy: 100, typedPerfect: 3, recallAttempts: 2, recallSuccess: 2, successDays: ['2026-03-01', '2026-03-02', '2026-03-03'], lastPracticed: 'x' }
+    expect(moduleMastery(nav, d).status).toBe('completed')
+    d.quizzes[nav.id]!.best = 0.8
+    expect(moduleMastery(nav, d).status).toBe('mastered')
+  })
+
   it('reports unmet beginner prerequisites without blocking access', () => {
     expect(unmetPrerequisites(path, 3, emptyData()).length).toBeGreaterThan(0)
     expect(unmetPrerequisites(path, 0, emptyData())).toEqual([])

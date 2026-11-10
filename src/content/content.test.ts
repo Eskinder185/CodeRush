@@ -52,7 +52,9 @@ describe('programming lessons', () => {
 
 describe('command exercises', () => {
   it('meets the 200 distinct exercise target', () => {
-    expect(commands.length).toBeGreaterThanOrEqual(200)
+    expect(commands.length).toBe(262)
+    expect(commands.filter((c) => c.category === 'version-control')).toHaveLength(12)
+    expect(commands.filter((c) => c.category === 'ai-models')).toHaveLength(8)
   })
 
   it('has unique, well-formed ids that match their platform', () => {
@@ -174,6 +176,14 @@ describe('scenarios', () => {
 
 describe('learning paths', () => {
   const modules = learningPaths.flatMap((p) => p.modules)
+
+  it('includes complete GitHub and AI model paths', () => {
+    expect(learningPaths).toHaveLength(10)
+    expect(modules).toHaveLength(120)
+    expect(modules.flatMap((m) => m.quiz)).toHaveLength(224)
+    expect(learningPaths.find((p) => p.id === 'git-github')?.modules).toHaveLength(4)
+    expect(learningPaths.find((p) => p.id === 'ai-models')?.modules).toHaveLength(3)
+  })
 
   it('has globally unique module and question ids', () => {
     const ids = new Set<string>()

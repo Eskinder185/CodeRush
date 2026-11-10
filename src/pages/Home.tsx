@@ -15,6 +15,9 @@ import { useTypingSession } from '../components/typing/useTypingSession'
 import { TypingSurface, type TypingSurfaceHandle } from '../components/typing/TypingSurface'
 import { FlowSteps, PathIcon, TerminalVisual, SecurityVisual, HeroBackdrop, CodePanel, ACCENTS } from '../components/graphics/Graphics'
 import { NetworkTopology } from '../components/graphics/NetworkTopology'
+import { Onboarding } from '../components/learning/Onboarding'
+import { readPreferences, recommendedPath } from '../lib/onboarding'
+import { findWeaknesses } from '../lib/recommend'
 
 const DEMO = `def greet(name):
     return f"Hello, {name}!"`
@@ -86,25 +89,18 @@ function Personal() {
   const last = data.sessions.at(-1)
   const hasActivity = data.sessions.length > 0 || !!data.lastVisited
 
-  if (!hasActivity) {
-    return (
-      <div className="panel panel-pad flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="eyebrow">New here?</p>
-          <h2 className="mt-1 text-h3">Start with Linux terminal basics or your first Python lesson.</h2>
-          <p className="mt-1 text-sm text-fg-subtle">No account needed. Progress saves in this browser automatically.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ButtonLink to="/learn/linux/linux.navigation">Linux basics</ButtonLink>
-          <ButtonLink to="/languages/python/lesson/python-basics-1" variant="secondary">
-            First Python lesson
-          </ButtonLink>
-        </div>
-      </div>
-    )
-  }
+  if (!hasActivity) return null
+  const preferences = readPreferences()
+  const suggested = preferences ? recommendedPath(preferences.goal) : null
+  const weakness = findWeaknesses(data, 1)[0]
   return (
     <div className="grid gap-4 md:grid-cols-3">
+      <div className="panel panel-pad md:col-span-3">
+        <p className="eyebrow">Welcome back · Today&rsquo;s plan</p>
+        <h2 className="mt-1 text-h3">{suggested ? `Continue ${suggested.title}` : 'Keep your learning moving'}</h2>
+        <p className="mt-1 text-sm text-fg-subtle">{preferences ? `Your ${preferences.dailyMinutes}-minute daily goal. ` : ''}{weakness ? weakness.reason : 'Choose a lesson, review a command, or take today’s challenge.'}</p>
+        <div className="mt-3 flex flex-wrap gap-2"><ButtonLink to="/today" size="sm">Open today&rsquo;s plan</ButtonLink><ButtonLink to={suggested ? `/learn/${suggested.id}` : '/learn'} size="sm" variant="secondary">Recommended path</ButtonLink><ButtonLink to="/challenges" size="sm" variant="secondary">Daily challenge</ButtonLink>{weakness && <ButtonLink to={`/practice?drill=${weakness.category}`} size="sm" variant="secondary">Review {weakness.label}</ButtonLink>}</div>
+      </div>
       {data.lastVisited && (
         <Link to={data.lastVisited.path} className="panel panel-pad interactive group">
           <p className="text-xs font-medium text-fg-subtle">Continue where you left off</p>
@@ -178,19 +174,19 @@ export default function Home() {
           <div>
             <p className="eyebrow">Typing · Learning · Command Lab</p>
             <h1 className="mt-4 text-display text-fg">
-              Master the Keyboard.
+              Master the keyboard.
               <br />
-              <span className="bg-gradient-to-r from-[#38BDF8] to-[#8B5CF6] bg-clip-text text-transparent">Master the Code.</span>
+              <span className="bg-gradient-to-r from-[#38BDF8] to-[#8B5CF6] bg-clip-text text-transparent">Understand the commands. Solve real problems.</span>
             </h1>
             <p className="lead mt-6 max-w-xl">
-              Build typing speed, learn programming syntax, and practice the commands used by developers, network engineers, and cybersecurity professionals, all in one interactive learning experience.
+              Learn programming and technical typing, Linux, PowerShell, networking, and defensive cybersecurity through hands-on practice.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <ButtonLink to="/learn" size="lg">
-                Start Learning <ArrowRight className="h-5 w-5" aria-hidden />
+                Start My Learning Journey <ArrowRight className="h-5 w-5" aria-hidden />
               </ButtonLink>
               <ButtonLink to="/practice?mode=timed&duration=30" size="lg" variant="secondary">
-                <Timer className="h-5 w-5" aria-hidden /> Quick Typing Test
+                <Timer className="h-5 w-5" aria-hidden /> Try a 30-Second Typing Test
               </ButtonLink>
             </div>
             <ul className="mt-8 grid max-w-lg grid-cols-2 gap-x-6 gap-y-2 text-sm text-fg-muted">
@@ -206,6 +202,7 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-page px-4 pb-16 sm:px-6 lg:px-8">
+        <div id="journey" className="mb-4 scroll-mt-24"><Onboarding /></div>
         <Personal />
       </section>
 
@@ -267,8 +264,8 @@ export default function Home() {
             </ul>
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink to="/lab">Open the Command Lab</ButtonLink>
-              <ButtonLink to="/lab/scenario/sc.linux.dns-fail" variant="secondary">
-                Try a DNS scenario
+              <ButtonLink to="/missions/internet-down" variant="secondary">
+                Investigate a network mission
               </ButtonLink>
             </div>
           </div>

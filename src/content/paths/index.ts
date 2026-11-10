@@ -4,6 +4,7 @@ import { linuxPath, linuxNetworkingPath, linuxSecurityPath } from './linux'
 import { powershellPath } from './powershell'
 import { networkingPath, ciscoPath } from './networking'
 import { securityPath } from './security'
+import { gitGithubPath, aiModelsPath } from './git-ai'
 
 export const learningPaths: LearningPath[] = [
   programmingPath,
@@ -14,6 +15,8 @@ export const learningPaths: LearningPath[] = [
   linuxNetworkingPath,
   linuxSecurityPath,
   ciscoPath,
+  gitGithubPath,
+  aiModelsPath,
 ]
 
 export function getPath(id: string): LearningPath | undefined {

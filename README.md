@@ -10,6 +10,16 @@ CodeRush is a free, browser-based practice platform for people who work with cod
 
 Live site: <https://eskinder185.github.io/CodeRush/>
 
+See the full project documentation:
+- [Features](docs/FEATURES.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Mastery Model](docs/MASTERY.md)
+- [Content Authoring Guide](docs/CONTENT.md)
+- [Test Results](docs/TEST_RESULTS.md)
+- [Audit & Consolidation](docs/AUDIT.md)
+- [Backlog](docs/BACKLOG.md)
+- [Changelog](docs/CHANGELOG.md)
+
 ## What is included
 
 These counts come from the content files and are enforced by `src/content/content.test.ts`.
@@ -17,12 +27,12 @@ These counts come from the content files and are enforced by `src/content/conten
 | Content | Count |
 | --- | --- |
 | Programming typing lessons, preserved from 1.x | 45, in 9 languages |
-| Command exercises | 242: Linux 119, PowerShell 89, Windows CMD 17, Cisco IOS 17 |
+| Command exercises | 262: Linux and cross-platform CLI 139, PowerShell 89, Windows CMD 17, Cisco IOS 17 |
 | Troubleshooting scenarios | 32: Linux 8, PowerShell 8, networking 6, Cisco 4, security 6 |
-| Learning paths | 8, with 113 modules |
-| Quiz questions | 210 |
+| Learning paths | 10, with 120 modules |
+| Quiz questions | 224 |
 
-Learning paths: Programming Syntax (9 modules), Linux Command Line (13), Windows PowerShell (27), Networking Fundamentals (24), Defensive Cybersecurity (19), Linux Networking (10), Linux Security (6), and Cisco IOS Essentials (5).
+Learning paths: Programming Syntax (9 modules), Linux Command Line (13), Windows PowerShell (27), Networking Fundamentals (24), Defensive Cybersecurity (19), Linux Networking (10), Linux Security (6), Cisco IOS Essentials (5), Git and GitHub (4), and AI Models and LLMs (3).
 
 ## Features
 
@@ -47,7 +57,7 @@ The Command Lab never executes anything. Input is compared with stored answers i
 
 There are no accounts, analytics, or backend. Progress is stored in the browser's local storage and does not sync between devices. Export a file from the Progress page to back it up.
 
-CodeRush 1.x progress (`coderush_user_stats`) is migrated automatically on first load. The old key is left in place as a backup.
+Earlier progress stored in `coderush_user_stats` or `coderush:data:v2` is migrated automatically on first load. The older keys are left in place as backups. Older export files remain importable. The Progress page previews imports before changing saved data.
 
 ## Development
 
@@ -89,7 +99,7 @@ See [docs/CONTENT.md](docs/CONTENT.md) for how to add commands, scenarios, and m
 
 ## Deployment
 
-One workflow, `.github/workflows/deploy-pages.yml`, runs type checking, linting, unit tests, the build, and browser tests on every push and pull request. On `main` it uploads `dist/` and deploys with the GitHub Pages Actions. In the repository settings, Pages must use **GitHub Actions** as its source.
+One workflow, `.github/workflows/deploy-pages.yml`, runs type checking, linting, unit tests, the build, and browser tests on pull requests and pushes to `main`. On `main` it uploads `dist/` and deploys with GitHub Pages Actions. In repository settings, Pages must use **GitHub Actions** as its source.
 
 The site is served from `/CodeRush/`. Vite's `base` and the router's `basename` both come from that one setting in `vite.config.ts`. The build copies `index.html` to `404.html`, so deep links such as `/CodeRush/lab/command/linux.pwd` load the app.
 

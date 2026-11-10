@@ -28,8 +28,23 @@ describe('navigation and shell', () => {
   it('renders the homepage hero and primary actions', async () => {
     go('/')
     expect(await screen.findByRole('heading', { level: 1, name: /Master the Keyboard/i })).toBeInTheDocument()
-    expect(screen.getAllByRole('link', { name: /Start Learning/i })[0]).toHaveAttribute('href', '/learn')
-    expect(screen.getByRole('link', { name: /Quick Typing Test/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Start My Learning Journey/i })).toHaveAttribute('href', '/learn')
+    expect(screen.getByRole('link', { name: /30-Second Typing Test/i })).toBeInTheDocument()
+  })
+
+  it('saves an optional three-step learning goal', async () => {
+    localStorage.removeItem('coderush:preferences:v1')
+    localStorage.removeItem('coderush:onboarding:skipped:v1')
+    go('/')
+    fireEvent.click(await screen.findByRole('button', { name: 'Start my learning journey' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Networking & IT Support' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Some experience' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: '20 minutes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'See my path' }))
+    expect(JSON.parse(localStorage.getItem('coderush:preferences:v1')!)).toMatchObject({ goal: 'network', level: 'Some experience', dailyMinutes: 20 })
+    expect(screen.getByRole('link', { name: /Open recommended path/i })).toHaveAttribute('href', '/learn/networking')
   })
 
   it('opens and closes the mobile menu', async () => {
@@ -186,7 +201,20 @@ describe('practice', () => {
   })
 })
 
-describe('progress import', () => {
+describe('progress and review history', () => {
+  it('renders command review history with recall, typing, mastery, and confusions', async () => {
+    const { recordCommandTyped, recordRecall } = await import('../lib/storage/store')
+    recordCommandTyped('linux.pwd', 100, true)
+    recordRecall('linux.pwd', true)
+    recordRecall('linux.ip-addr-show', false, 'linux.traceroute')
+
+    go('/progress')
+    expect(await screen.findByRole('heading', { level: 2, name: /Command review history/i })).toBeInTheDocument()
+    expect(screen.getAllByText('pwd').length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/ip addr show/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Confused with/i).length).toBeGreaterThan(0)
+  })
+
   it('reports an invalid import file without changing data', async () => {
     go('/progress')
     await screen.findByRole('heading', { level: 1, name: /Your progress/i })

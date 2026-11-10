@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
-const WIDTHS = [320, 375, 390, 430, 768, 1024, 1440, 1920]
-const PAGES = ['', 'learn', 'learn/networking', 'learn/networking/net.subnetting', 'practice', 'lab', 'lab/command/linux.ip-addr-show', 'lab/scenario/sc.linux.dns-fail', 'tools/subnetting', 'tools/topology', 'challenges', 'progress', 'languages/python/lessons', 'about']
+const WIDTHS = [320, 360, 375, 390, 430, 768, 1024, 1440, 1920]
+const PAGES = ['', 'today', 'journeys', 'journeys/network', 'missions', 'missions/internet-down', 'learn', 'learn/networking', 'learn/networking/net.subnetting', 'learn/git-github', 'learn/ai-models', 'practice', 'lab', 'lab/command/linux.ip-addr-show', 'lab/command/linux.git-status', 'lab/command/linux.ollama-ls', 'lab/scenario/sc.linux.dns-fail', 'tools/subnetting', 'tools/topology', 'tools/topology?incident=vlan', 'challenges', 'progress', 'languages/python/lessons', 'about']
 
 async function noHorizontalOverflow(page: Page) {
   return page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
@@ -97,10 +97,90 @@ test.describe('keyboard-only flows', () => {
     await input.press('ArrowUp')
     await expect(input).toHaveValue('pwd')
   })
+
+  test('onboarding recommends a real path and survives refresh', async ({ page }) => {
+    await page.goto('')
+    await page.getByRole('button', { name: 'Start my learning journey' }).click()
+    await page.getByRole('button', { name: 'Networking & IT Support' }).click()
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await page.getByRole('button', { name: 'Some experience' }).click()
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await page.getByRole('button', { name: '20 minutes' }).click()
+    await page.getByRole('button', { name: 'See my path' }).click()
+    await expect(page.getByRole('link', { name: /Open recommended path/ })).toHaveAttribute('href', '/CodeRush/learn/networking')
+    await page.reload()
+    await expect(page.getByText('20 minutes a day', { exact: false })).toBeVisible()
+  })
+
+  test('terminal navigation changes the virtual working directory', async ({ page }) => {
+    await page.goto('lab')
+    const input = page.getByLabel(/Command input/)
+    await input.fill('cd /var/log')
+    await input.press('Enter')
+    await expect(page.getByRole('log')).toContainText('Working directory: /var/log')
+    await input.fill('pwd')
+    await input.press('Enter')
+    await expect(page.getByRole('log')).toContainText('student@coderush:/var/log$ pwd')
+    await input.fill('cat syslog')
+    await input.press('Enter')
+    await expect(page.getByRole('log')).toContainText('resolver timed out')
+  })
+
+  test('mission accepts evidence in any order and saves its score', async ({ page }) => {
+    await page.goto('missions/internet-down')
+    await page.getByRole('button', { name: /Query DNS/ }).click()
+    await page.getByRole('button', { name: /Test the gateway/ }).click()
+    await page.getByRole('button', { name: /Inspect IP configuration/ }).click()
+    await page.getByRole('button', { name: /Test DNS host connectivity/ }).click()
+    await page.getByRole('button', { name: /The DNS service is failing/ }).click()
+    await page.getByRole('button', { name: /Escalate the DNS failure/ }).click()
+    await page.getByRole('button', { name: /Run verification/ }).click()
+    await expect(page.getByRole('heading', { name: 'Mission complete · 100/100' })).toBeVisible()
+    await page.goto('missions')
+    await expect(page.getByText('Best score: 100/100')).toBeVisible()
+  })
+
+  test('weekly practice goal can be changed and persists', async ({ page }) => {
+    await page.goto('progress')
+    const goal = page.getByLabel('Weekly goal')
+    await goal.selectOption('120')
+    await expect(page.getByText('0 of 120 minutes recorded this week.', { exact: false })).toBeVisible()
+    await page.reload()
+    await expect(goal).toHaveValue('120')
+  })
+
+  test('VLAN mission explains the port mismatch and verifies the corrected assignment', async ({ page }) => {
+    await page.goto('missions/vlan-connectivity')
+    await page.getByRole('button', { name: 'Inspect VLAN membership' }).click()
+    await page.getByRole('button', { name: 'Inspect switch port status' }).click()
+    await page.getByRole('button', { name: /Gi1\/0\/12 is assigned/ }).click()
+    await page.getByRole('button', { name: /Confirm the approved port assignment/ }).click()
+    await page.getByRole('button', { name: 'Run verification' }).click()
+    await expect(page.getByRole('heading', { name: /Mission complete/ })).toBeVisible()
+    await expect(page.getByRole('log')).toContainText('Gi1/0/12   LAB-PC-04  connected  20')
+  })
+
+  test('Git and AI learning paths open sourced command lessons', async ({ page }) => {
+    await page.goto('learn/git-github')
+    await expect(page.getByRole('heading', { level: 1, name: 'Git and GitHub' })).toBeVisible()
+    await page.goto('lab/command/linux.git-status')
+    await expect(page.getByText('Git status reference')).toHaveAttribute('href', 'https://git-scm.com/docs/git-status')
+    await page.goto('learn/ai-models')
+    await expect(page.getByRole('heading', { level: 1, name: 'AI Models and LLMs' })).toBeVisible()
+    await page.goto('lab/command/linux.ollama-ls')
+    await expect(page.getByText('Ollama CLI reference')).toHaveAttribute('href', 'https://docs.ollama.com/cli')
+  })
+
+  test('incident topology shows the affected VLAN path', async ({ page }) => {
+    await page.goto('missions/vlan-connectivity')
+    await page.getByRole('link', { name: 'View incident topology' }).click()
+    await expect(page.getByText('VLAN 30 · wrong')).toBeVisible()
+    await expect(page.getByText(/guest VLAN 30: the port is connected/)).toBeVisible()
+  })
 })
 
 test.describe('accessibility', () => {
-  for (const p of ['', 'learn/linux', 'learn/linux/linux.navigation', 'practice', 'lab', 'lab/command/linux.ss-tuln', 'lab/scenario/sc.ps.port-test', 'tools/subnetting', 'progress', 'faq']) {
+  for (const p of ['', 'today', 'journeys', 'journeys/network', 'missions', 'missions/internet-down', 'learn/linux', 'learn/linux/linux.navigation', 'practice', 'lab', 'lab/command/linux.ss-tuln', 'lab/scenario/sc.ps.port-test', 'tools/subnetting', 'progress', 'faq']) {
     test(`no serious axe violations on /${p}`, async ({ page }) => {
       await page.goto(p)
       await page.getByRole('heading', { level: 1 }).first().waitFor()

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { loadFromStrings, migrateLegacyRow, parseImport, validateAppData, mergeData } from './migrate'
-import { emptyData, LEGACY_KEY, STORAGE_KEY } from './schema'
+import { importComparison, loadFromStrings, migrateLegacyRow, parseImport, validateAppData, mergeData } from './migrate'
+import { emptyData, LEGACY_KEY, PREVIOUS_KEY, STORAGE_KEY } from './schema'
 import {
   getData,
   importText,
@@ -63,9 +63,19 @@ describe('legacy migration', () => {
 
   it('prefers v2 data and falls back to v1 when v2 is corrupt', () => {
     const v1 = JSON.stringify([legacyRow])
-    expect(loadFromStrings('{not json', v1).data.sessions).toHaveLength(1)
+    expect(loadFromStrings('{not json', null, v1).data.sessions).toHaveLength(1)
     const v2 = JSON.stringify(emptyData())
-    expect(loadFromStrings(v2, v1).data.sessions).toHaveLength(0)
+    expect(loadFromStrings(null, v2, v1).data.sessions).toHaveLength(0)
+    expect(loadFromStrings(v2, null, v1).data.sessions).toHaveLength(0)
+  })
+
+  it('migrates v2 progress to v3 without deleting the old key', () => {
+    const old = { ...emptyData(), version: 2, missions: undefined, favorites: ['linux.pwd'] }
+    localStorage.setItem(PREVIOUS_KEY, JSON.stringify(old))
+    expect(getData().favorites).toEqual(['linux.pwd'])
+    expect(getData().missions).toEqual({})
+    expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull()
+    expect(localStorage.getItem(PREVIOUS_KEY)).not.toBeNull()
   })
 })
 
@@ -84,7 +94,7 @@ describe('validation', () => {
 })
 
 describe('import and export', () => {
-  it('round-trips a v2 export', () => {
+  it('round-trips a v3 export', () => {
     recordSession({
       kind: 'speed', trackId: 'mixed', itemId: 'mixed', durationSec: 30, wpm: 50, rawWpm: 55, accuracy: 96,
       correctChars: 125, keystrokes: 130, uncorrected: 0, corrected: 5, missing: 0, excess: 0, passed: false,
@@ -95,7 +105,7 @@ describe('import and export', () => {
     expect(getData().sessions).toHaveLength(0)
     const r = importText(text, 'replace')
     expect(r.ok).toBe(true)
-    expect(r.format).toBe('v2')
+    expect(r.format).toBe('v3')
     expect(getData().sessions).toHaveLength(1)
     expect(getData().favorites).toEqual(['linux.pwd'])
   })
@@ -103,6 +113,14 @@ describe('import and export', () => {
   it('imports a version 1 export document and raw array', () => {
     expect(parseImport(JSON.stringify({ exportVersion: 1, app: 'CodeRush', sessions: [legacyRow] })).format).toBe('v1-export')
     expect(parseImport(JSON.stringify([legacyRow])).format).toBe('v1-array')
+  })
+
+  it('accepts a version 2 export without missions', () => {
+    const old = { ...emptyData(), version: 2, missions: undefined, favorites: ['linux.pwd'] }
+    const result = parseImport(JSON.stringify({ app: 'CodeRush', schemaVersion: 2, data: old }))
+    expect(result.format).toBe('v2')
+    expect(result.data?.favorites).toEqual(['linux.pwd'])
+    expect(result.data?.missions).toEqual({})
   })
 
   it('explains failures', () => {
@@ -117,6 +135,20 @@ describe('import and export', () => {
     const merged = mergeData(a, a)
     expect(merged.sessions).toHaveLength(1)
   })
+
+  it('previews counts and duplicate IDs across all progress records', () => {
+    const current = emptyData()
+    const incoming = emptyData()
+    current.sessions = [migrateLegacyRow(legacyRow)!]
+    incoming.sessions = [migrateLegacyRow(legacyRow)!]
+    current.commands['linux.pwd'] = { typedBestAccuracy: 100, typedPerfect: 1, recallAttempts: 0, recallSuccess: 0, successDays: [], lastPracticed: '2026-03-01T10:00:00Z' }
+    incoming.commands['linux.pwd'] = current.commands['linux.pwd']!
+    incoming.commands['linux.ls'] = current.commands['linux.pwd']!
+    const preview = importComparison(current, incoming)
+    expect(preview.sessions).toEqual({ current: 1, incoming: 1, duplicates: 1, afterMerge: 1 })
+    expect(preview.commands).toEqual({ current: 1, incoming: 2, duplicates: 1, afterMerge: 2 })
+    expect(preview.missions.afterMerge).toBe(0)
+  })
 })
 
 describe('command progress', () => {
@@ -126,6 +158,9 @@ describe('command progress', () => {
     recordCommandTyped('linux.ls', 95, true)
     expect(getData().commands['linux.ls']!.typedBestAccuracy).toBe(95)
     recordRecall('linux.ls', false, 'linux.pwd')
+    expect(getData().commands['linux.ls']!.lastRecallCorrect).toBe(false)
+    recordRecall('linux.ls', true)
+    expect(getData().commands['linux.ls']!.lastRecallCorrect).toBe(true)
     expect(getData().confusions[0]).toMatchObject({ expected: 'linux.ls', got: 'linux.pwd' })
     expect(getData().recent[0]).toBe('linux.ls')
   })

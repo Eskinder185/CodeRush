@@ -3,6 +3,7 @@ import { FlaskConical } from 'lucide-react'
 import { prefersReducedMotion, useSettings } from '../../lib/settings'
 
 type NodeId = 'internet' | 'fw' | 'r1' | 'sw1' | 'pc' | 'guest' | 'dns' | 'app'
+export type TopologyIncident = 'normal' | 'dns' | 'vlan'
 
 interface NodeDef {
   id: NodeId
@@ -138,12 +139,30 @@ function Glyph({ n }: { n: NodeDef }) {
   }
 }
 
-export function NetworkTopology({ compact = false }: { compact?: boolean }) {
+export function NetworkTopology({ compact = false, incident = 'normal' }: { compact?: boolean; incident?: TopologyIncident }) {
   const settings = useSettings()
   const motion = !prefersReducedMotion(settings)
   const [selected, setSelected] = useState<NodeId>('pc')
-  const node = NODES.find((n) => n.id === selected)!
-  const pos = Object.fromEntries(NODES.map((n) => [n.id, n])) as Record<NodeId, NodeDef>
+  const nodes = NODES.map((n): NodeDef => {
+    if (incident === 'vlan' && n.id === 'pc') return {
+      ...n, vlan: 'VLAN 30',
+      details: [{ title: 'Port assignment (simulated)', text: 'Intended VLAN 10 Staff\nObserved Gi1/0/2 VLAN 30 Guest\nPhysical link: connected\nGuest isolation blocks staff access' }],
+      explain: 'The workstation is physically connected, but its access port is in guest VLAN 30. Its traffic enters the wrong broadcast domain and cannot reach staff services under the guest policy.',
+    }
+    if (incident === 'dns' && n.id === 'dns') return {
+      ...n, details: [{ title: 'DNS service (simulated)', text: 'Host 192.0.2.130 responds to ping\nDNS query for app.lab.example: SERVFAIL\nService requires investigation' }],
+      explain: 'The DNS host is reachable, but the resolver returns SERVFAIL. A ping tests host reachability; it does not prove the DNS service is healthy.',
+    }
+    return n
+  })
+  const node = nodes.find((n) => n.id === selected)!
+  const pos = Object.fromEntries(nodes.map((n) => [n.id, n])) as Record<NodeId, NodeDef>
+  const affected = incident === 'dns' ? 'dns' : incident === 'vlan' ? 'pc' : null
+  const packetFlow = incident === 'dns'
+    ? 'PC-114 → gateway R1 → VLAN 20 → DNS1: the host answers at its IP, but the DNS query returns SERVFAIL. Name lookup stops here; no application address is returned.'
+    : incident === 'vlan'
+      ? 'PC-114 → SW1 Gi1/0/2 → guest VLAN 30: the port is connected, but the frame enters the wrong VLAN. Guest isolation prevents the intended staff path. Move the port to its approved VLAN and renew the lease.'
+      : 'PC-114 → gateway R1 → VLAN 20 → DNS1 → APP1: DNS returns an address, then the client can open a separate connection to the application.'
 
   const onKey = (e: KeyboardEvent, id: NodeId) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -163,9 +182,9 @@ export function NetworkTopology({ compact = false }: { compact?: boolean }) {
             { x: 390, w: 280, v: 'VLAN 20' },
           ].map((z) => (
             <g key={z.v}>
-              <rect x={z.x} y={338} width={z.w} height={84} rx={10} fill={VLAN_COLOR[z.v]} fillOpacity={0.06} stroke={VLAN_COLOR[z.v]} strokeOpacity={0.35} strokeDasharray="4 4" />
-              <text x={z.x + 10} y={354} className="text-[10px] font-semibold" fill={VLAN_COLOR[z.v]}>
-                {z.v}
+              <rect x={z.x} y={338} width={z.w} height={84} rx={10} fill={incident === 'vlan' && z.v === 'VLAN 10' ? '#FB7185' : VLAN_COLOR[z.v]} fillOpacity={0.06} stroke={incident === 'vlan' && z.v === 'VLAN 10' ? '#FB7185' : VLAN_COLOR[z.v]} strokeOpacity={0.35} strokeDasharray="4 4" />
+              <text x={z.x + 10} y={354} className="text-[10px] font-semibold" fill={incident === 'vlan' && z.v === 'VLAN 10' ? '#FB7185' : VLAN_COLOR[z.v]}>
+                {incident === 'vlan' && z.v === 'VLAN 10' ? 'VLAN 30 · wrong' : z.v}
               </text>
             </g>
           ))}
@@ -174,9 +193,10 @@ export function NetworkTopology({ compact = false }: { compact?: boolean }) {
             const B = pos[b]
             const d = `M${A.x},${A.y} L${B.x},${B.y}`
             const active = selected === a || selected === b
+            const disrupted = (incident === 'dns' && b === 'dns') || (incident === 'vlan' && b === 'pc')
             return (
               <g key={`${a}-${b}`}>
-                <path d={d} stroke={active ? 'rgb(var(--accent))' : 'rgb(var(--line-strong))'} strokeWidth={active ? 2 : 1.5} fill="none" />
+                <path d={d} stroke={disrupted ? '#FB7185' : active ? 'rgb(var(--accent))' : 'rgb(var(--line-strong))'} strokeWidth={active || disrupted ? 2 : 1.5} strokeDasharray={disrupted ? '5 4' : undefined} fill="none" />
                 {motion && (
                   <circle r="3" fill="rgb(var(--accent))" opacity="0.85">
                     <animateMotion dur={`${2.4 + (A.x % 7) * 0.2}s`} repeatCount="indefinite" path={d} />
@@ -190,7 +210,7 @@ export function NetworkTopology({ compact = false }: { compact?: boolean }) {
               </g>
             )
           })}
-          {NODES.map((n) => {
+          {nodes.map((n) => {
             const sel = n.id === selected
             return (
               <g
@@ -204,7 +224,7 @@ export function NetworkTopology({ compact = false }: { compact?: boolean }) {
                 onKeyDown={(e) => onKey(e, n.id)}
                 className="cursor-pointer outline-none [&:focus-visible>circle.focus]:opacity-100"
               >
-                <circle className="focus" r="34" fill="none" stroke="rgb(var(--accent))" strokeWidth="2" opacity={sel ? 1 : 0} />
+                <circle className="focus" r="34" fill="none" stroke={affected === n.id ? '#FB7185' : 'rgb(var(--accent))'} strokeWidth="2" opacity={sel || affected === n.id ? 1 : 0} />
                 <circle r="34" fill="transparent" />
                 <Glyph n={n} />
                 <text y={n.kind === 'cloud' ? 26 : 34} textAnchor="middle" className="fill-fg text-[11px] font-semibold">
@@ -216,6 +236,7 @@ export function NetworkTopology({ compact = false }: { compact?: boolean }) {
         </svg>
       </div>
       <aside className="panel panel-pad" aria-live="polite">
+        <p className="mb-3 rounded-md border border-line bg-sunken p-3 text-sm text-fg-muted"><span className="font-semibold text-fg">Simulated packet path:</span> {packetFlow}</p>
         <div className="mb-1 flex items-center gap-2 text-2xs font-semibold uppercase tracking-wider text-fg-subtle">
           <FlaskConical className="h-3.5 w-3.5" aria-hidden /> Simulated device
         </div>

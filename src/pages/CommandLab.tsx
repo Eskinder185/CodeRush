@@ -53,6 +53,7 @@ export default function CommandLab() {
               <Brain className="h-4 w-4" aria-hidden /> Recall mode
             </ButtonLink>
             <ButtonLink to={`/practice?mode=command&platform=${platform}`}>Command typing</ButtonLink>
+            <ButtonLink to="/missions" variant="secondary">Troubleshooting missions</ButtonLink>
           </>
         }
       />

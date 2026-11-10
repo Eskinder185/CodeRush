@@ -39,7 +39,7 @@ export function Terminal({
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const id = useId()
-  const p = prompt ?? PROMPTS[platform]
+  const p = prompt ?? (platform === 'linux' ? `student@coderush:${state.cwd === '/home/student' ? '~' : state.cwd}$` : PROMPTS[platform])
   const shell = SHELL_OF[platform]
   const isPS = platform === 'powershell' || platform === 'windows-cmd'
 

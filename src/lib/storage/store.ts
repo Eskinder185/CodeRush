@@ -3,7 +3,7 @@
  * exposed to React through useSyncExternalStore. Nothing leaves the device.
  */
 import { useSyncExternalStore } from 'react'
-import { LEGACY_KEY, LIMITS, SCHEMA_VERSION, STORAGE_KEY, emptyData, type AppData, type PracticeSession } from './schema'
+import { LEGACY_KEY, LIMITS, PREVIOUS_KEY, SCHEMA_VERSION, STORAGE_KEY, emptyData, type AppData, type PracticeSession } from './schema'
 import { loadFromStrings, mergeData, parseImport, type ImportResult } from './migrate'
 
 type Listener = () => void
@@ -20,7 +20,7 @@ function read(key: string): string | null {
 }
 
 function load(): AppData {
-  const { data, migrated } = loadFromStrings(read(STORAGE_KEY), read(LEGACY_KEY))
+  const { data, migrated } = loadFromStrings(read(STORAGE_KEY), read(PREVIOUS_KEY), read(LEGACY_KEY))
   if (migrated) persist(data)
   return data
 }
@@ -129,6 +129,7 @@ export function recordRecall(id: string, success: boolean, confusedWith?: string
   update((d) => {
     const p = touchCommand(d, id, now)
     p.recallAttempts += 1
+    p.lastRecallCorrect = success
     if (success) {
       p.recallSuccess += 1
       p.successDays = addSuccessDay(p.successDays, now)
@@ -159,6 +160,17 @@ export function recordScenario(id: string, firstTryRatio: number) {
       completed: true,
       attempts: (cur?.attempts ?? 0) + 1,
       bestFirstTry: Math.max(cur?.bestFirstTry ?? 0, firstTryRatio),
+      completedAt: new Date().toISOString(),
+    }
+  })
+}
+
+export function recordMission(id: string, score: number) {
+  update((d) => {
+    const cur = d.missions[id]
+    d.missions[id] = {
+      attempts: (cur?.attempts ?? 0) + 1,
+      bestScore: Math.max(cur?.bestScore ?? 0, Math.min(100, Math.max(0, Math.round(score)))),
       completedAt: new Date().toISOString(),
     }
   })

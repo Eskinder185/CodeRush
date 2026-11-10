@@ -1,33 +1,39 @@
-# CodeRush 1.x audit (baseline for 2.0)
+# CodeRush Project Audit & Consolidation
 
-Audited at commit `5fdcb5f`, which is the current `origin/main` and the deployed site.
+## Project Evolution and History
 
-## Baseline results
+1. **CodeRush 1.x Baseline**:
+   - Original implementation featured a basic typing trainer for programming languages.
+   - Audited at commit `5fdcb5f`, revealing build configuration issues, inaccurate lesson completion tracking, and dead code.
+2. **CodeRush 2.0 Architectural Foundation**:
+   - Replaced fragile foundations with modern React 18, TypeScript, and Vite 5.
+   - Introduced Command Lab with safe command matching, interactive subnetting, network topology explorer, and mistake training.
+   - Implemented multi-factor mastery scoring separate from speed metrics.
+3. **Consolidation and Safe Migration**:
+   - Canonical repository path established at `C:\Users\eskew\github\CodeRush`.
+   - Separate Angular/Spring/Python experimental work previously on local `main` was safely archived to the `archive/angular-spring-postgres-platform` branch and backed up independently to `C:\Users\eskew\github\CodeRush-angular-spring-backup`.
+   - Completed React development branch (`codex/coderush-3.0`) consolidated as the active canonical codebase.
+   - Product naming unified as **CodeRush** across application code, documentation, and metadata.
 
-| Check | Result |
-| --- | --- |
-| `npm run build` (`tsc && vite build`) | **Failed.** `LanguagePractice.tsx(275)`: `Timeout` is not assignable to `number`. |
-| `vite build` alone | Passed. One 453 kB JavaScript chunk. |
-| `npm run lint` | **Failed to run.** `.eslintrc.cjs` extended `@typescript-eslint/recommended` instead of `plugin:@typescript-eslint/recommended`. |
-| Tests | None existed. |
+## Audited Requirements & Verified Features
 
-## Bugs found and fixed
-
-| Area | Bug | Fix |
+| Category | Requirement / Capability | Status in Code |
 | --- | --- | --- |
-| Progress | Per-language "total lessons" was the number of attempts, not lessons available. | The denominator now comes from the lesson library. |
-| Progress | Any attempt that reached the end counted as a completed lesson, even with wrong characters. | Lessons pass only on an exact match. Migrated 1.x rows pass only when `mistakes` was 0. |
-| Buttons | "Request a language" (Languages), "Contact support" and "Join community" (FAQ), and two About buttons had no action. | Replaced with working links to the repository issue tracker and real pages. |
-| Claims | About and FAQ claimed Rust and "many more" languages, and "thousands of developers". | Removed. Counts are now computed from content. |
-| Free practice | `PracticeMode` always typed the first lesson of a language and offered no options. | Replaced by Typing Practice with seven modes and settings. |
-| Mistakes | `symbolsMissed` was always saved as an empty array. | The engine records per-character and per-category attempts and errors. |
-| Mobile | The overlay textarea forwarded wheel events, had no composition handling, and offered no way to type symbols on phones. | IME composition is handled, symbol keys are added, and input is a focus-preserving hidden textarea. |
-| Deployment | `public/404.html` carried another product's name ("AstraFocusNexus"), and a `?/` redirect script in `App.tsx` was dead code. | Removed. The build copies the app shell to `404.html`. |
-| Routing | The router basename was hardcoded as `/CodeRush` separately from Vite's `base`. | Both derive from Vite's `base`. |
-| Dead code | `CodeEditor`, `SimpleCodeEditor`, `SimpleCodeDisplay`, `MonacoErrorBoundary`, `LanguagePractice`, `ThemeSwitcher`, and `ParticleBackground` were unused. Monaco and react-syntax-highlighter were bundled but unused. | Removed with their dependencies. |
+| **Onboarding** | Optional 3-question learning goal and daily minute preference | Implemented & verified |
+| **Journeys** | 5 career journeys mapping paths and outcomes | Implemented & verified |
+| **Today Plan** | Goal-based dynamic recommendations and due reviews | Implemented & verified |
+| **Command Review History** | Recall & typing stats, next review date, mistake tracking | Implemented & verified |
+| **Weekly Goal** | User-editable weekly practice-time target on Progress | Implemented & verified |
+| **Virtual Terminal** | Stateful in-memory Linux filesystem navigation (`cd`, `pwd`, `ls`, `cat`) | Implemented & verified |
+| **Investigation Missions** | 5 evidence-led troubleshooting missions with order-independent scoring | Implemented & verified |
+| **Topology Incidents** | Simulated DNS failure and wrong VLAN incident modes | Implemented & verified |
+| **Curriculum** | 45 code lessons, 262 commands, 120 modules in 10 paths, 32 scenarios | Implemented & verified |
+| **New Content** | Git & GitHub CLI exercises, Ollama & Hugging Face CLI exercises | Implemented & verified |
+| **Storage & Data** | Multi-version migration (v1, v2, v3), duplicate handling, import preview | Implemented & verified |
+| **Build & Deploy** | Single GitHub Pages workflow with `/CodeRush/` base and `404.html` SPA fallback | Implemented & verified |
 
-The spec also mentioned a second workflow, `static.yml`. It does not exist at this commit; only `deploy-pages.yml` was present. That workflow is replaced by the single test-and-deploy workflow.
+## Technical Debt Addressed
 
-## Note on repository history
-
-The local `main` branch carries three unpushed commits that replace this app with an Angular, Spring Boot, and Python interview platform. CodeRush 2.0 was built on the branch `coderush-2.0` from `5fdcb5f`, so that work is untouched. Merging the two lines of history is a separate decision for the repository owner.
+- **Update depth loop resolved**: Traced and eliminated React's "Maximum update depth exceeded" cycle in `TypingSurface.tsx` by removing redundant local state mirroring.
+- **Cross-browser test coverage**: Extended automated e2e testing from Chromium-only to full multi-browser coverage including Firefox and WebKit (117 total browser tests).
+- **Consolidated documentation**: Removed split or redundant versioned documents (`CODERUSH_3_*`) and established clean, authoritative documentation for CodeRush.

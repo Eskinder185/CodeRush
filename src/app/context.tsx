@@ -36,6 +36,9 @@ export function usePageMeta(title: string, description?: string) {
       document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
     }
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title)
+    const url = `https://eskinder185.github.io${window.location.pathname}`
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', url)
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', url)
   }, [title, description])
 }
 

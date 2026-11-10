@@ -125,4 +125,13 @@ describe('simulated terminal', () => {
     expect(help.handled && help.state.lines.at(-1)!.text).toMatch(/not a real shell/)
     expect(runBuiltin(t, 'pwd', 'linux').handled).toBe(false)
   })
+
+  it('changes virtual directories and reads synthetic logs', () => {
+    const changed = runFree(createTerm(), 'cd /var/log', 'linux', linux).state
+    expect(changed.cwd).toBe('/var/log')
+    expect(runFree(changed, 'pwd', 'linux', linux).state.lines.at(-1)?.text).toBe('/var/log')
+    expect(runFree(changed, 'ls', 'linux', linux).state.lines.at(-1)?.text).toContain('syslog')
+    expect(runFree(changed, 'cat syslog', 'linux', linux).state.lines.at(-1)?.text).toContain('resolver timed out')
+    expect(runFree(changed, 'cd /missing', 'linux', linux).state.cwd).toBe('/var/log')
+  })
 })

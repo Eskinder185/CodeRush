@@ -31,6 +31,12 @@ const moduleDone = (d: AppData, pathId: string, moduleId: string) => {
 
 export const achievements: Achievement[] = [
   {
+    id: 'first-mission', title: 'Evidence-led investigator', icon: 'shield',
+    description: 'Complete your first troubleshooting mission.',
+    progress: (d) => ratio(Object.keys(d.missions).length, 1),
+    detail: (d) => `${Object.keys(d.missions).length} mission${Object.keys(d.missions).length === 1 ? '' : 's'} completed`,
+  },
+  {
     id: 'first-lesson', title: 'First Lesson', icon: 'flag',
     description: 'Pass any programming lesson with an exact match.',
     progress: (d) => ratio(overallStats(d).lessonsPassed, 1),

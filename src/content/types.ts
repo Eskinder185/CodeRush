@@ -54,6 +54,8 @@ export type CommandCategory =
   | 'scripting'
   | 'automation'
   | 'device'
+  | 'version-control'
+  | 'ai-models'
 
 export const CATEGORY_LABEL: Record<CommandCategory, string> = {
   fundamentals: 'Fundamentals',
@@ -72,6 +74,8 @@ export const CATEGORY_LABEL: Record<CommandCategory, string> = {
   scripting: 'Scripting',
   automation: 'Automation',
   device: 'Network devices',
+  'version-control': 'Git and GitHub',
+  'ai-models': 'AI models and LLMs',
 }
 
 export type Safety =

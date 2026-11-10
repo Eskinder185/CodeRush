@@ -7,13 +7,17 @@ export default defineConfig({
   fullyParallel: true,
   reporter: [['list']],
   use: {
-    baseURL: 'http://localhost:4173/CodeRush/',
+    baseURL: 'http://127.0.0.1:4187/CodeRush/',
     trace: 'retain-on-failure',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+  ],
   webServer: {
-    command: 'npx vite preview --port 4173 --strictPort',
-    url: 'http://localhost:4173/CodeRush/',
+    command: 'npx vite preview --host 127.0.0.1 --port 4187 --strictPort',
+    url: 'http://127.0.0.1:4187/CodeRush/',
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
   },

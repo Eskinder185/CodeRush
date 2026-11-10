@@ -4,6 +4,18 @@ All notable changes to the CodeRush project.
 
 ## CodeRush Latest
 
+### Bring Your Own AI (BYOAI) & AI Practice Studio
+- **Bring Your Own AI Engine**: Native adapters for local Ollama (`http://localhost:11434`), LM Studio (`http://localhost:1234/v1`), custom OpenAI-compatible inference servers, and user-owned HTTPS gateways.
+- **AI Practice Studio (`/practice/ai`)**: Dedicated studio with prompt composer supporting any programming language (Rust, Go, Zig, Elixir, Python, TypeScript, C++, SQL, Bash, etc.).
+- **Six Generation Modes**: Code Typing, Guided Lessons, Multiple-Choice Quizzes, Debugging Challenges, Code Completion, and Syntax Drills.
+- **Runtime Schema Validation**: Zod-powered schema validation and line-ending normalization ensuring well-formed and safe generated content.
+- **Existing Engine Reuse**: Directly reuses CodeRush's `PracticeRunner` for typing exercises (preserving WPM, accuracy, Focus Mode, and mistake metrics).
+- **Conversational Revisions**: Interactive modification of generated exercises ("make simpler", "add comments", "harder variation").
+- **Contextual AI Tutor**: Dedicated drawer for answering questions scoped strictly to the active exercise.
+- **My AI Practices Library**: Local storage library with search, filtering, duplication, deletion, and secret-free JSON export/import.
+- **Performance Recommendations**: Context-aware recommendations suggesting syntax drills or next curriculum topics based on session performance.
+- **Local Network Access Guidance**: Clear CORS configuration documentation and diagnostics for Ollama (`OLLAMA_ORIGINS`) and LM Studio.
+
 ### Consolidated Features & Fixes
 - **Unified Product & Branding**: Consolidated active codebase into single canonical repository at `C:\Users\eskew\github\CodeRush` with CodeRush branding throughout.
 - **Fixed React Update Depth Warning**: Traced and eliminated React's "Maximum update depth exceeded" re-render loop in `TypingSurface.tsx` by synchronizing input directly with the typing engine.

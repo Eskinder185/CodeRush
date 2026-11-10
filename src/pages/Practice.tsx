@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Zap, Timer, Target, Terminal as TerminalIcon, Braces, ClipboardPaste, Brain, Sparkles, Info } from 'lucide-react'
+import { Zap, Timer, Target, Terminal as TerminalIcon, Braces, ClipboardPaste, Brain, Sparkles, Info, Bot } from 'lucide-react'
 import { Button, PageHeader, Segmented, Select } from '../components/ui'
 import { PracticeRunner, sessionFields } from '../components/typing/PracticeRunner'
 import type { SessionResult } from '../components/typing/useTypingSession'
@@ -13,7 +13,7 @@ import { CATEGORY_LABEL, PLATFORM_LABEL, type CommandCategory, type Platform } f
 import { recordSession, getData } from '../lib/storage/store'
 import type { SessionKind } from '../lib/storage/schema'
 
-const MODES: { id: PracticeMode | 'recall'; label: string; Icon: typeof Zap; blurb: string }[] = [
+const MODES: { id: PracticeMode | 'recall' | 'ai'; label: string; Icon: typeof Zap; blurb: string }[] = [
   { id: 'speed', label: 'Speed Test', Icon: Zap, blurb: 'A short block of real code. Type it as fast and cleanly as you can.' },
   { id: 'timed', label: 'Timed Challenge', Icon: Timer, blurb: 'A standard test for 15, 30, 60, or 120 seconds. Comparable across attempts.' },
   { id: 'accuracy', label: 'Accuracy Training', Icon: Target, blurb: 'A wrong key does not advance. Fix it before moving on. Careful beats fast.' },
@@ -21,6 +21,7 @@ const MODES: { id: PracticeMode | 'recall'; label: string; Icon: typeof Zap; blu
   { id: 'syntax', label: 'Syntax Training', Icon: Braces, blurb: 'Lines dense with brackets, quotes, pipes, and operators.' },
   { id: 'custom', label: 'Custom Practice', Icon: ClipboardPaste, blurb: 'Paste your own code or text. It is never executed or sent anywhere.' },
   { id: 'recall', label: 'Recall Mode', Icon: Brain, blurb: 'Read a task and type the command from memory.' },
+  { id: 'ai', label: 'AI Studio', Icon: Bot, blurb: 'Generate custom exercises in any language with Bring Your Own AI.' },
 ]
 
 const ALL_MODES: PracticeMode[] = ['speed', 'timed', 'accuracy', 'command', 'syntax', 'custom']
@@ -76,12 +77,19 @@ export default function Practice() {
 
       {!focusMode && !isDrill && (
         <div className="mb-6 space-y-4">
-          <div role="radiogroup" aria-label="Practice mode" className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+          <div role="radiogroup" aria-label="Practice mode" className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8">
             {MODES.map((m) =>
               m.id === 'recall' ? (
                 <Link key={m.id} to="/practice/recall" className="flex flex-col items-start gap-1.5 rounded-lg border border-line bg-surface p-3 text-left text-sm interactive">
                   <m.Icon className="h-4 w-4 text-accent" aria-hidden />
                   <span className="font-medium">{m.label}</span>
+                </Link>
+              ) : m.id === 'ai' ? (
+                <Link key={m.id} to="/practice/ai" className="flex flex-col items-start gap-1.5 rounded-lg border border-accent/40 bg-accent/5 p-3 text-left text-sm interactive">
+                  <m.Icon className="h-4 w-4 text-accent" aria-hidden />
+                  <span className="font-medium flex items-center gap-1">
+                    {m.label} <Sparkles className="h-3 w-3 text-accent" />
+                  </span>
                 </Link>
               ) : (
                 <button

@@ -4,7 +4,7 @@
  */
 import { emptyData, LIMITS, SCHEMA_VERSION, type AppData, type PracticeSession, type SessionKind } from './schema'
 
-const KINDS: SessionKind[] = ['lesson', 'guided', 'speed', 'accuracy', 'command', 'syntax', 'timed', 'custom', 'daily', 'weakness']
+const KINDS: SessionKind[] = ['lesson', 'guided', 'speed', 'accuracy', 'command', 'syntax', 'timed', 'custom', 'daily', 'weakness', 'ai']
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 const num = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
@@ -183,6 +183,9 @@ export function validateAppData(raw: unknown): ValidationReport {
   if (isObj(raw.migratedFromV1) && validDate(raw.migratedFromV1.at) && num(raw.migratedFromV1.sessions)) {
     data.migratedFromV1 = { at: raw.migratedFromV1.at, sessions: raw.migratedFromV1.sessions }
   }
+  if (Array.isArray(raw.aiPractices)) {
+    data.aiPractices = raw.aiPractices.filter((p: unknown) => isObj(p) && str(p.id) && str(p.title) && str(p.language)).slice(-LIMITS.aiPractices)
+  }
   data.sessions = dedupe(data.sessions).slice(-LIMITS.sessions)
   return { data, accepted: data.sessions.length, rejected }
 }
@@ -326,6 +329,17 @@ export function mergeData(base: AppData, add: AppData): AppData {
   out.subnet = {
     attempts: Math.max(base.subnet.attempts, add.subnet.attempts),
     correct: Math.max(base.subnet.correct, add.subnet.correct),
+  }
+  if (add.aiPractices?.length) {
+    const existingIds = new Set((base.aiPractices ?? []).map((p) => p.id))
+    const merged = [...(base.aiPractices ?? [])]
+    for (const p of add.aiPractices) {
+      if (!existingIds.has(p.id)) {
+        merged.push(p)
+        existingIds.add(p.id)
+      }
+    }
+    out.aiPractices = merged.slice(-LIMITS.aiPractices)
   }
   return out
 }

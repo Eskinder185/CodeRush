@@ -12,6 +12,7 @@ Live site: <https://eskinder185.github.io/CodeRush/>
 
 See the full project documentation:
 - [Features](docs/FEATURES.md)
+- [Bring Your Own AI (BYOAI)](docs/BYOAI.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Mastery Model](docs/MASTERY.md)
 - [Content Authoring Guide](docs/CONTENT.md)
@@ -36,7 +37,8 @@ Learning paths: Programming Syntax (9 modules), Linux Command Line (13), Windows
 
 ## Features
 
-- **Typing practice**: Speed Test, Timed Challenge (15, 30, 60, or 120 s), Accuracy Training (wrong keys do not advance), Command Practice, Syntax Training, Custom Practice, and Recall Mode.
+- **Typing practice**: Speed Test, Timed Challenge (15, 30, 60, or 120 s), Accuracy Training (wrong keys do not advance), Command Practice, Syntax Training, Custom Practice, Recall Mode, and AI Practice Studio.
+- **Bring Your Own AI (BYOAI)**: connect local Ollama, LM Studio, or an AI gateway to generate personalized typing drills, multiple-choice quizzes, debugging exercises, and guided lessons in any programming language. See [docs/BYOAI.md](docs/BYOAI.md).
 - **Typing engine**: net and raw WPM, accuracy that counts corrected mistakes, uncorrected and corrected errors, missing and excess characters, paste blocking, IME composition, Unicode, multiline text, forgiving or strict indentation, and an explicit Tab mechanism.
 - **Focus Mode**, keyboard shortcuts, an on-screen keyboard guide, and on-screen symbol keys for phones.
 - **Guided command lessons** in seven steps: Learn, Understand, Observe, Type, Recall, Apply, Review.

@@ -19,7 +19,7 @@ import { CATEGORY_LABEL, PLATFORM_LABEL, type CommandCategory } from '../content
 import type { PracticeSession } from '../lib/storage/schema'
 
 const ICONS = { flag: Flag, target: Target, zap: Zap, code: Code2, terminal: Terminal, powershell: TerminalSquare, network: Network, shield: ShieldCheck, calendar: CalendarDays, brackets: Braces, trophy: Trophy }
-const KIND_LABEL: Record<PracticeSession['kind'], string> = { lesson: 'Lesson', guided: 'Command lesson', speed: 'Speed test', accuracy: 'Accuracy', command: 'Commands', syntax: 'Syntax', timed: 'Timed', custom: 'Custom', daily: 'Daily', weakness: 'Drill' }
+const KIND_LABEL: Record<PracticeSession['kind'], string> = { lesson: 'Lesson', guided: 'Command lesson', speed: 'Speed test', accuracy: 'Accuracy', command: 'Commands', syntax: 'Syntax', timed: 'Timed', custom: 'Custom', daily: 'Daily', weakness: 'Drill', ai: 'AI Practice' }
 
 function shortDate(iso: string) {
   const d = new Date(iso)

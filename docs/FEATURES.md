@@ -65,3 +65,20 @@ CodeRush combines keyboard muscle memory training with comprehensive computer sc
 - **Network Topology Explorer**:
   - Interactive SVG diagram of a multi-VLAN branch office (Staff, Servers, Guest).
   - Normal, DNS failure, and Wrong-VLAN incident modes illustrating packet paths.
+
+### 6. Bring Your Own AI (BYOAI) & AI Practice Studio
+- **Local Model Adapters**:
+  - Direct native integration with local Ollama (`http://localhost:11434`) and LM Studio (`http://localhost:1234/v1`).
+  - Support for custom self-hosted OpenAI-compatible inference servers and private HTTPS gateways.
+- **Dynamic Content Generation**:
+  - Generate exercises in any programming language (Rust, Go, Zig, Elixir, Python, TypeScript, C++, SQL, Bash, etc.).
+  - 6 exercise modes: Code Typing, Guided Lessons, Multiple-Choice Quizzes, Debugging Challenges, Code Completion, and Syntax Drills.
+  - Strict runtime schema validation (Zod) enforcing size limits, line ending normalization, and structured output.
+- **Conversational Revisions & Contextual AI Tutor**:
+  - Edit code before typing or request conversational revisions ("make simpler", "add comments").
+  - Contextual AI Tutor drawer for answering questions scoped strictly to the active exercise.
+- **My AI Practices Library**:
+  - Local library with search, language filters, duplication, renaming, and export/import (credentials strictly excluded).
+- **Adaptive Performance Recommendations**:
+  - Evaluates typing metrics and mistake patterns to suggest next steps (e.g. bracket drills or curriculum progressions).
+- For complete architecture and CORS guides, see [docs/BYOAI.md](BYOAI.md).

@@ -57,6 +57,8 @@ export interface CommandProgress {
   typedPerfect: number
   recallAttempts: number
   recallSuccess: number
+  /** Latest recall outcome, when recorded by CodeRush 3. Older data may omit it. */
+  lastRecallCorrect?: boolean
   /** Distinct local dates (YYYY-MM-DD) with a successful typed or recalled attempt. Capped at 10. */
   successDays: string[]
   lastPracticed: string

@@ -3,9 +3,8 @@
 ## CodeRush 3 remaining work
 
 - Full independent syntax and output review of all 242 command exercises against current official documentation.
-- Extend mission coverage to VLAN connectivity and DHCP diagnosis; add mission-specific topology changes and richer packet-flow explanations.
+- Add mission-specific topology changes and richer packet-flow explanations.
 - Add a user-editable weekly goal and deeper review history. Current daily minutes are saved through onboarding.
-- Add an accessible import comparison for command, quiz, scenario, and mission records; the current preview reports session counts and duplicates.
 - Investigate the pre-existing React maximum update-depth warning in a typing UI test.
 - Measure Lighthouse and Web Vitals on a deployed production build. Add Firefox, WebKit, and manual screen-reader testing.
 - Decide how the remote React `main` branch and the separate unpushed local `main` project should coexist before synchronizing that worktree.

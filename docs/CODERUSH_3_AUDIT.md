@@ -29,4 +29,4 @@ The production build succeeds with `/CodeRush/` as the base and a `404.html` SPA
 
 ## Technical debt and selected improvements
 
-The old scenario engine is sequential, and independent technical review of all commands is outstanding. CodeRush 3 adds three flexible evidence-led missions, local goal selection, due reviews, career routes, a stateful virtual directory, a stronger mastery gate, a versioned storage migration, and import preview. Remaining work is tracked in `BACKLOG.md`.
+The old scenario engine is sequential, and independent technical review of all commands is outstanding. CodeRush 3 adds five flexible evidence-led missions, local goal selection, due reviews, career routes, a stateful virtual directory, a stronger mastery gate, a versioned storage migration, and import preview. Remaining work is tracked in `BACKLOG.md`.

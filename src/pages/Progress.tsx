@@ -6,7 +6,7 @@ import { LineChart, BarChart, type Point } from '../components/charts/Charts'
 import { VirtualKeyboard } from '../components/typing/VirtualKeyboard'
 import { usePageMeta } from '../app/context'
 import { clearAllData, downloadExport, importText, useAppData } from '../lib/storage/store'
-import { parseImport, type ImportResult } from '../lib/storage/migrate'
+import { importComparison, parseImport, type ImportResult, type ImportRecordKind } from '../lib/storage/migrate'
 import { formatDuration, languageProgress, overallStats, typingSessions, weekKey } from '../lib/progress'
 import { findConfusions, findWeaknesses, keyErrorRates } from '../lib/recommend'
 import { achievements } from '../lib/achievements'
@@ -31,7 +31,7 @@ function DataManagement() {
   const [mode, setMode] = useState<'merge' | 'replace'>('merge')
   const [confirm, setConfirm] = useState(false)
   const [preview, setPreview] = useState<{ text: string; result: ImportResult } | null>(null)
-  const duplicates = preview?.result.data?.sessions.filter((s) => data.sessions.some((cur) => cur.id === s.id)).length ?? 0
+  const comparison = preview?.result.data ? importComparison(data, preview.result.data) : null
   return (
     <section className="panel panel-pad" aria-labelledby="data-h">
       <h2 id="data-h" className="text-h3">Your data</h2>
@@ -72,7 +72,16 @@ function DataManagement() {
       </div>
       <p className="mt-3 text-xs text-fg-subtle">Accepts CodeRush 3 and 2 exports and files exported by CodeRush 1.x.</p>
       <Dialog open={!!preview} onClose={() => setPreview(null)} title="Review import">
-        {preview && <><p className="text-sm text-fg-muted">Format: {preview.result.format}. {preview.result.accepted} valid session{preview.result.accepted === 1 ? '' : 's'}; {preview.result.rejected} invalid record{preview.result.rejected === 1 ? '' : 's'} skipped. {duplicates} session{duplicates === 1 ? '' : 's'} already in this browser.</p><p className="mt-3 text-sm text-fg-muted">{mode === 'merge' ? 'Merge keeps current progress and deduplicates sessions by ID.' : 'Replace removes current progress and uses only the imported data.'}</p><div className="mt-5 flex flex-wrap justify-end gap-2"><Button variant="secondary" onClick={() => setPreview(null)}>Cancel</Button><Button onClick={() => { const r = importText(preview.text, mode); setPreview(null); if (r.ok) toast(`Imported ${r.accepted} valid sessions.`, 'success'); else toast(r.error ?? 'Import failed.', 'warn') }}>Confirm {mode}</Button></div></>}
+        {preview && <>
+          <p className="text-sm text-fg-muted">Format: {preview.result.format}. {preview.result.rejected} invalid record{preview.result.rejected === 1 ? '' : 's'} skipped.</p>
+          {comparison && <div className="mt-3 overflow-x-auto"><table className="w-full text-sm tabular-nums">
+            <caption className="mb-2 text-left text-sm font-medium">Progress before and after {mode}</caption>
+            <thead><tr className="text-left text-xs text-fg-subtle"><th scope="col" className="pr-3">Record</th><th scope="col" className="px-2 text-right">Current</th><th scope="col" className="px-2 text-right">File</th><th scope="col" className="px-2 text-right">Same ID</th><th scope="col" className="pl-2 text-right">After</th></tr></thead>
+            <tbody>{(['sessions', 'commands', 'quizzes', 'scenarios', 'missions'] as ImportRecordKind[]).map((kind) => <tr key={kind} className="border-t border-line"><th scope="row" className="py-1 pr-3 text-left font-medium capitalize">{kind}</th><td className="px-2 text-right">{comparison[kind].current}</td><td className="px-2 text-right">{comparison[kind].incoming}</td><td className="px-2 text-right">{comparison[kind].duplicates}</td><td className="pl-2 text-right">{mode === 'merge' ? comparison[kind].afterMerge : comparison[kind].incoming}</td></tr>)}</tbody>
+          </table></div>}
+          <p className="mt-3 text-sm text-fg-muted">{mode === 'merge' ? 'Merge keeps current progress. Records with the same ID are combined; best scores are kept. Session history is capped at 3,000.' : 'Replace removes current progress and uses only the imported data.'}</p>
+          <div className="mt-5 flex flex-wrap justify-end gap-2"><Button variant="secondary" onClick={() => setPreview(null)}>Cancel</Button><Button onClick={() => { const r = importText(preview.text, mode); setPreview(null); if (r.ok) toast(`Imported ${r.accepted} valid sessions.`, 'success'); else toast(r.error ?? 'Import failed.', 'warn') }}>Confirm {mode}</Button></div>
+        </>}
       </Dialog>
       <Dialog open={confirm} onClose={() => setConfirm(false)} title="Clear all progress?">
         <p className="text-sm text-fg-muted">This deletes every session, mastery score, quiz result, and daily challenge in this browser. It cannot be undone. Export first if you might want it back.</p>

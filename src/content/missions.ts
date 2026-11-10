@@ -84,6 +84,53 @@ export const missions: Mission[] = [
     verification: { command: 'Get-NetTCPConnection', output: 'No connection to 203.0.113.77:4444 after synthetic containment. The incident team is reviewing preserved evidence.', explanation: 'This confirms the observed connection stopped in the simulation; it does not certify the host as clean.' },
     lesson: 'Correlate process IDs, task creation, and network records. Preserve evidence and follow approved containment procedures.',
   },
+  {
+    id: 'dhcp-failure', title: 'A workstation has no address', platform: 'windows-cmd',
+    summary: 'Trace a failed DHCP lease without assuming the cable is broken.',
+    incident: 'WS-LAB-21 cannot reach its gateway. Its network icon shows a connection, but it cannot use internal services. Inspect its lease and the simulated switch path.',
+    tools: [
+      { id: 'config', command: 'ipconfig /all', label: 'Inspect address and DHCP settings', output: 'Ethernet adapter: Link active\nAutoconfiguration IPv4 Address: 169.254.23.41/16\nDHCP Enabled: Yes\nDHCP Server: unavailable\nDefault Gateway: (none)', relevant: true },
+      { id: 'renew', command: 'ipconfig /renew', label: 'Attempt to renew the lease', output: 'Unable to contact your DHCP server. Request timed out. No lease was assigned.', relevant: true },
+      { id: 'link', command: 'netsh interface show interface', label: 'Check interface state', output: 'Ethernet  Connected  Enabled\nPhysical link is up; DHCP reachability is not established.', relevant: true },
+      { id: 'relay', command: 'ping 192.0.2.1', label: 'Test the expected gateway', output: 'Destination host unreachable from 169.254.23.41. This alone does not identify whether the DHCP server or relay failed.', relevant: false },
+    ],
+    diagnoses: [
+      { label: 'The client has no valid DHCP lease; the DHCP path must be checked.', correct: true, explanation: 'A 169.254/16 link-local address, no gateway, and a failed renewal establish a lease failure. The exact upstream cause needs network-side investigation.' },
+      { label: 'DNS is the only failed service.', correct: false, explanation: 'The client lacks a usable address and gateway before name resolution can matter.' },
+      { label: 'The cable is certainly disconnected.', correct: false, explanation: 'The interface reports an active physical link.' },
+    ],
+    resolutions: [
+      { label: 'Check the DHCP scope, relay, and VLAN path with the network team; restore service, then renew the lease.', correct: true, explanation: 'This investigates the lease path without guessing which upstream device failed.' },
+      { label: 'Disable the firewall on every workstation.', correct: false, explanation: 'There is no evidence that host firewalls caused the failed lease.' },
+      { label: 'Assign 192.0.2.1 to this client as its static address.', correct: false, explanation: 'That address is the expected gateway and would create a conflict.' },
+    ],
+    verification: { command: 'ipconfig /all', output: 'IPv4 Address: 192.0.2.82/25\nDefault Gateway: 192.0.2.1\nDHCP Server: 192.0.2.10\nLease Obtained: today 10:05', explanation: 'The synthetic client now has a DHCP lease and gateway. A separate connectivity test would confirm service reachability.' },
+    lesson: 'A link-local 169.254/16 address points to a failed IPv4 DHCP assignment, but client output alone does not prove which server, relay, or VLAN component failed.',
+  },
+  {
+    id: 'vlan-connectivity', title: 'Devices on the wrong VLAN', platform: 'cisco-ios',
+    summary: 'Compare access-port assignment, addressing, and routing evidence.',
+    incident: 'LAB-PC-04 should be in VLAN 20 with the support desk, but cannot reach 192.0.2.25. Its switch port Gi1/0/12 is up. Use the synthetic switch snapshots to locate the mismatch.',
+    tools: [
+      { id: 'interface', command: 'show interfaces status', label: 'Inspect switch port status', output: 'Port       Name       Status     Vlan\nGi1/0/12   LAB-PC-04  connected  30\nGi1/0/13   DESK-02    connected  20', relevant: true },
+      { id: 'vlan', command: 'show vlan brief', label: 'Inspect VLAN membership', output: '20  Support  active  Gi1/0/13\n30  Guest    active  Gi1/0/12', relevant: true },
+      { id: 'address', command: 'show ip interface brief', label: 'Inspect routed VLAN interfaces', output: 'Vlan20  192.0.2.1  up  up\nVlan30  198.51.100.1  up  up', relevant: true },
+      { id: 'route', command: 'show ip route', label: 'Inspect routing', output: 'C 192.0.2.0/25 is directly connected, Vlan20\nC 198.51.100.0/25 is directly connected, Vlan30', relevant: false },
+      { id: 'acl', command: 'show access-lists', label: 'Inspect access control', output: 'No ACL is applied to Gi1/0/12 in this snapshot. VLAN 30 guest isolation remains in effect.', relevant: true },
+    ],
+    diagnoses: [
+      { label: 'Gi1/0/12 is assigned to guest VLAN 30 instead of support VLAN 20.', correct: true, explanation: 'Both status and VLAN membership put the affected port in VLAN 30; the intended desk port is in VLAN 20.' },
+      { label: 'The switch port is physically down.', correct: false, explanation: 'The status output shows Gi1/0/12 connected.' },
+      { label: 'The support VLAN has no routed interface.', correct: false, explanation: 'Vlan20 is up with a gateway address.' },
+    ],
+    resolutions: [
+      { label: 'Confirm the approved port assignment, move Gi1/0/12 to VLAN 20, and renew the client lease.', correct: true, explanation: 'Correcting the access VLAN and lease aligns the client with the intended support network.' },
+      { label: 'Disable guest VLAN isolation for the entire switch.', correct: false, explanation: 'That broad change is unnecessary and weakens the designed policy.' },
+      { label: 'Replace the routing table without changing the port.', correct: false, explanation: 'The observed mismatch is at the access port.' },
+    ],
+    verification: { command: 'show interfaces status', output: 'Port       Name       Status     Vlan\nGi1/0/12   LAB-PC-04  connected  20\nGi1/0/13   DESK-02    connected  20', explanation: 'The synthetic port is now in VLAN 20. Verify the client lease and connectivity separately before closing the ticket.' },
+    lesson: 'A connected port can still be on the wrong VLAN. Compare membership and addressing before changing routing or security policy.',
+  },
 ]
 
 export function getMission(id: string) { return missions.find((m) => m.id === id) }

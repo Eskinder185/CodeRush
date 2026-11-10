@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { loadFromStrings, migrateLegacyRow, parseImport, validateAppData, mergeData } from './migrate'
+import { importComparison, loadFromStrings, migrateLegacyRow, parseImport, validateAppData, mergeData } from './migrate'
 import { emptyData, LEGACY_KEY, PREVIOUS_KEY, STORAGE_KEY } from './schema'
 import {
   getData,
@@ -135,6 +135,20 @@ describe('import and export', () => {
     const merged = mergeData(a, a)
     expect(merged.sessions).toHaveLength(1)
   })
+
+  it('previews counts and duplicate IDs across all progress records', () => {
+    const current = emptyData()
+    const incoming = emptyData()
+    current.sessions = [migrateLegacyRow(legacyRow)!]
+    incoming.sessions = [migrateLegacyRow(legacyRow)!]
+    current.commands['linux.pwd'] = { typedBestAccuracy: 100, typedPerfect: 1, recallAttempts: 0, recallSuccess: 0, successDays: [], lastPracticed: '2026-03-01T10:00:00Z' }
+    incoming.commands['linux.pwd'] = current.commands['linux.pwd']!
+    incoming.commands['linux.ls'] = current.commands['linux.pwd']!
+    const preview = importComparison(current, incoming)
+    expect(preview.sessions).toEqual({ current: 1, incoming: 1, duplicates: 1, afterMerge: 1 })
+    expect(preview.commands).toEqual({ current: 1, incoming: 2, duplicates: 1, afterMerge: 2 })
+    expect(preview.missions.afterMerge).toBe(0)
+  })
 })
 
 describe('command progress', () => {
@@ -144,6 +158,9 @@ describe('command progress', () => {
     recordCommandTyped('linux.ls', 95, true)
     expect(getData().commands['linux.ls']!.typedBestAccuracy).toBe(95)
     recordRecall('linux.ls', false, 'linux.pwd')
+    expect(getData().commands['linux.ls']!.lastRecallCorrect).toBe(false)
+    recordRecall('linux.ls', true)
+    expect(getData().commands['linux.ls']!.lastRecallCorrect).toBe(true)
     expect(getData().confusions[0]).toMatchObject({ expected: 'linux.ls', got: 'linux.pwd' })
     expect(getData().recent[0]).toBe('linux.ls')
   })

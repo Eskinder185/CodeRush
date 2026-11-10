@@ -10,7 +10,7 @@ CodeRush is a free, browser-based practice platform for people who work with cod
 
 ## CodeRush 3 development branch
 
-This branch adds optional three-question onboarding, five career journeys that reuse existing paths, a goal-based Today plan, due command review, three synthetic troubleshooting missions, stateful Linux file navigation in the terminal, and saved mission scores. Module completion still accepts a 50% quiz result; mastery now also requires at least 80% on the quiz when one exists. See [features](docs/CODERUSH_3_FEATURES.md), [architecture](docs/CODERUSH_3_ARCHITECTURE.md), and [test results](docs/CODERUSH_3_TEST_RESULTS.md).
+This branch adds optional three-question onboarding, five career journeys that reuse existing paths, a goal-based Today plan, due command review, five synthetic troubleshooting missions, stateful Linux file navigation in the terminal, and saved mission scores. Module completion still accepts a 50% quiz result; mastery now also requires at least 80% on the quiz when one exists. See [features](docs/CODERUSH_3_FEATURES.md), [architecture](docs/CODERUSH_3_ARCHITECTURE.md), and [test results](docs/CODERUSH_3_TEST_RESULTS.md).
 
 Live site: <https://eskinder185.github.io/CodeRush/>
 

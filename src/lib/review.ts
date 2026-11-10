@@ -8,8 +8,8 @@ import { readPreferences, recommendedPath } from './onboarding'
 
 export interface PlanItem { id: string; title: string; reason: string; to: string; minutes: number }
 
-export function reviewIntervalDays(score: number, recallAttempts: number, recallSuccess: number): number {
-  if (recallAttempts > recallSuccess) return 1
+export function reviewIntervalDays(score: number, lastRecallCorrect?: boolean): number {
+  if (lastRecallCorrect === false) return 1
   if (score >= 80) return 14
   if (score >= 60) return 7
   if (score >= 40) return 3
@@ -22,7 +22,7 @@ export function dueCommandIds(data: AppData, now = new Date()): string[] {
       if (!getCommand(id)) return false
       const last = Date.parse(p.lastPracticed)
       if (!Number.isFinite(last)) return true
-      const days = reviewIntervalDays(commandMastery(p).score, p.recallAttempts, p.recallSuccess)
+      const days = reviewIntervalDays(commandMastery(p).score, p.lastRecallCorrect)
       return now.getTime() - last >= days * 86_400_000
     })
     .sort((a, b) => Date.parse(a[1].lastPracticed) - Date.parse(b[1].lastPracticed))

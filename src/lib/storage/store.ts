@@ -129,6 +129,7 @@ export function recordRecall(id: string, success: boolean, confusedWith?: string
   update((d) => {
     const p = touchCommand(d, id, now)
     p.recallAttempts += 1
+    p.lastRecallCorrect = success
     if (success) {
       p.recallSuccess += 1
       p.successDays = addSuccessDay(p.successDays, now)

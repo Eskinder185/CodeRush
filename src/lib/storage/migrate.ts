@@ -134,6 +134,7 @@ export function validateAppData(raw: unknown): ValidationReport {
           typedPerfect: v.typedPerfect,
           recallAttempts: v.recallAttempts,
           recallSuccess: Math.min(v.recallSuccess, v.recallAttempts),
+          ...(typeof v.lastRecallCorrect === 'boolean' ? { lastRecallCorrect: v.lastRecallCorrect } : {}),
           successDays: strArray(v.successDays, LIMITS.successDays),
           lastPracticed: v.lastPracticed,
         }
@@ -199,6 +200,41 @@ export function dedupe(sessions: PracticeSession[]): PracticeSession[] {
 
 export type ImportFormat = 'v3' | 'v2' | 'v1-export' | 'v1-array'
 
+export type ImportRecordKind = 'sessions' | 'commands' | 'quizzes' | 'scenarios' | 'missions'
+export type ImportComparison = Record<ImportRecordKind, { current: number; incoming: number; duplicates: number; afterMerge: number }>
+
+/** Counts shown before an import is applied. A duplicate has the same stable record ID. */
+export function importComparison(current: AppData, incoming: AppData): ImportComparison {
+  const currentIds: Record<ImportRecordKind, string[]> = {
+    sessions: current.sessions.map((s) => s.id),
+    commands: Object.keys(current.commands),
+    quizzes: Object.keys(current.quizzes),
+    scenarios: Object.keys(current.scenarios),
+    missions: Object.keys(current.missions),
+  }
+  const incomingIds: Record<ImportRecordKind, string[]> = {
+    sessions: incoming.sessions.map((s) => s.id),
+    commands: Object.keys(incoming.commands),
+    quizzes: Object.keys(incoming.quizzes),
+    scenarios: Object.keys(incoming.scenarios),
+    missions: Object.keys(incoming.missions),
+  }
+  const result = {} as ImportComparison
+  for (const kind of Object.keys(currentIds) as ImportRecordKind[]) {
+    const existing = new Set(currentIds[kind])
+    const duplicates = incomingIds[kind].filter((id) => existing.has(id)).length
+    result[kind] = {
+      current: currentIds[kind].length,
+      incoming: incomingIds[kind].length,
+      duplicates,
+      afterMerge: kind === 'sessions'
+        ? Math.min(LIMITS.sessions, currentIds[kind].length + incomingIds[kind].length - duplicates)
+        : currentIds[kind].length + incomingIds[kind].length - duplicates,
+    }
+  }
+  return result
+}
+
 export interface ImportResult {
   ok: boolean
   format?: ImportFormat
@@ -261,6 +297,7 @@ export function mergeData(base: AppData, add: AppData): AppData {
           typedPerfect: Math.max(cur.typedPerfect, p.typedPerfect),
           recallAttempts: Math.max(cur.recallAttempts, p.recallAttempts),
           recallSuccess: Math.max(cur.recallSuccess, p.recallSuccess),
+          lastRecallCorrect: p.lastPracticed > cur.lastPracticed ? p.lastRecallCorrect : cur.lastRecallCorrect,
           successDays: [...new Set([...cur.successDays, ...p.successDays])].sort().slice(-LIMITS.successDays),
           lastPracticed: cur.lastPracticed > p.lastPracticed ? cur.lastPracticed : p.lastPracticed,
         }

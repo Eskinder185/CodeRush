@@ -4,9 +4,9 @@ import { dueCommandIds, reviewIntervalDays, todayPlan } from './review'
 
 describe('review planning', () => {
   it('schedules wrong recall earlier and strong mastery later', () => {
-    expect(reviewIntervalDays(80, 2, 1)).toBe(1)
-    expect(reviewIntervalDays(80, 2, 2)).toBe(14)
-    expect(reviewIntervalDays(45, 0, 0)).toBe(3)
+    expect(reviewIntervalDays(80, false)).toBe(1)
+    expect(reviewIntervalDays(80, true)).toBe(14)
+    expect(reviewIntervalDays(45)).toBe(3)
   })
 
   it('uses recorded practice and does not invent due items', () => {

@@ -10,6 +10,7 @@ import { Logo } from './Logo'
 export const NAV = [
   { to: '/', label: 'Home', end: true },
   { to: '/learn', label: 'Learn' },
+  { to: '/skills', label: 'Skills Lab' },
   { to: '/practice', label: 'Typing Practice' },
   { to: '/practice/ai', label: 'AI Studio' },
   { to: '/lab', label: 'Command Lab' },

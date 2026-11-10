@@ -21,6 +21,7 @@ const ModulePage = lazy(() => import('./pages/ModulePage'))
 const CommandLab = lazy(() => import('./pages/CommandLab'))
 const CommandLesson = lazy(() => import('./pages/CommandLesson'))
 const ScenarioPage = lazy(() => import('./pages/ScenarioPage'))
+const CareerSkillsLab = lazy(() => import('./pages/CareerSkillsLab'))
 const Practice = lazy(() => import('./pages/Practice'))
 const AIPracticeStudio = lazy(() => import('./pages/AIPracticeStudio'))
 const Recall = lazy(() => import('./pages/Recall'))
@@ -143,6 +144,8 @@ function Shell() {
                   <Route path="/lab" element={<CommandLab />} />
                   <Route path="/lab/command/:id" element={<CommandLesson />} />
                   <Route path="/lab/scenario/:id" element={<ScenarioPage />} />
+                  <Route path="/skills" element={<CareerSkillsLab />} />
+                  <Route path="/career-lab" element={<Navigate to="/skills" replace />} />
                   <Route path="/practice" element={<Practice />} />
                   <Route path="/practice/ai" element={<AIPracticeStudio />} />
                   <Route path="/practice/recall" element={<Recall />} />

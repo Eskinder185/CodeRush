@@ -34,6 +34,18 @@ export const gitGithubPath: LearningPath = {
         q('github-review-1', 'What should you inspect before opening a pull request?', ['Only the branch name', 'Its diff and target branch', 'Only a green icon', 'The remote password'], 1, 'The diff and target branch determine what reviewers will see and where it will merge.'),
         q('github-review-2', 'What does a queued CI check mean?', ['Passed', 'Failed', 'Still awaiting a result', 'Merged'], 2, 'Wait for the check result before treating it as verified.'),
       ] }),
+    m({ id: 'git.recovery', title: 'Work recovery and stash', level: 'intermediate', outcome: 'Safely shelve uncommitted work and recover from mistaken merges.', summary: 'Stash changes, restore staged files, and invert commits with git revert.',
+      concept: ['git stash pushes uncommitted changes into a safe local stack so you can pull or switch branches without losing work.', 'git restore --staged unstages a file without destroying disk edits. To undo a commit that was already pushed to a remote, use git revert to create a new safe inverse commit.'],
+      commandIds: ['linux.git-stash-push', 'linux.git-stash-pop', 'linux.git-restore-staged', 'linux.git-revert', 'linux.git-reflog', 'linux.git-merge-abort'], quiz: [
+        q('git-rec-1', 'Which command unstages a file without discarding your local disk changes?', ['git rm -f', 'git restore --staged <file>', 'git reset --hard', 'git checkout -b'], 1, 'git restore --staged moves the file from index back to unstaged working tree.'),
+        q('git-rec-2', 'Why is git revert preferred over git reset on shared public branches?', ['It is faster', 'It creates a new commit preserving linear history without rewriting past commits', 'It deletes the branch', 'It skips CI checks'], 1, 'Revert records a new commit that undoes changes safely without forcing collaborators to reconcile history.'),
+      ] }),
+    m({ id: 'git.collaboration', title: 'Advanced collaboration and release', level: 'advanced', outcome: 'Rebase linear history, inspect PR reviews, manage releases with tags, and monitor GitHub Actions.', summary: 'Rebase on upstream, review comments, release tags, and workflow inspection.',
+      concept: ['git rebase replays your commits one by one on top of the newest upstream commits, creating a clean linear history for review.', 'Annotated tags mark immutable release versions. GitHub CLI allows you to read review feedback and inspect failing CI job logs directly from your terminal.'],
+      commandIds: ['linux.git-branch-m', 'linux.git-rebase-main', 'linux.gh-pr-view', 'linux.git-tag-v', 'linux.gh-run-list', 'linux.gh-run-view'], quiz: [
+        q('git-collab-1', 'What does git rebase origin/main do to your branch?', ['Deletes all commits', 'Replays your feature commits on top of the latest origin/main', 'Merges with an automatic merge commit', 'Forces push to GitHub'], 1, 'Rebase reapplies your local commits onto the updated base branch.'),
+        q('git-collab-2', 'Which flag creates an annotated release tag containing metadata and a message?', ['-m only', '-a', '-f', '-d'], 1, '-a creates an annotated tag object.'),
+      ] }),
   ],
 }
 

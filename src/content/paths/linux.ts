@@ -244,6 +244,30 @@ export const linuxPath: LearningPath = {
       ],
       scenarioIds: [],
     },
+    {
+      id: 'linux.troubleshooting-workflows',
+      title: 'Systems troubleshooting workflows',
+      level: 'advanced',
+      outcome: 'Diagnose crashed daemons, storage exhaustion, open ports, and HTTP/DNS endpoints.',
+      summary: 'Systematic fault isolation with failed units, priority logs, large file discovery, listening sockets, and curl/resolvectl checks.',
+      concept: [
+        'When diagnosing production incidents, gather evidence systematically: check overall service health (systemctl --failed), inspect high-priority error logs, verify listening sockets and port bindings, check disk space consumption, and validate local API endpoints with curl.',
+        'Never guess or reboot before gathering diagnostic evidence. Structured commands provide verifiable root causes without executing disruptive changes.',
+      ],
+      commandIds: [
+        'linux.systemctl-status-failed',
+        'linux.journalctl-errors',
+        'linux.find-large-files',
+        'linux.ss-listening-tcp',
+        'linux.curl-health-check',
+        'linux.resolvectl-query',
+      ],
+      quiz: [
+        q('ltrouble-1', 'A service fails to bind to port 80. What command shows which process already holds port 80?', ['free -m', 'ss -tlpn', 'lsblk', 'uptime'], 1, 'ss -tlpn displays listening TCP sockets with process IDs.'),
+        q('ltrouble-2', 'Why does curl -fsSL help in automated health checks?', ['It runs faster', 'It fails silently with non-zero exit code on HTTP errors and follows redirects', 'It downloads images', 'It skips authentication'], 1, '-f tells curl to fail if the HTTP status code is 400 or higher.'),
+      ],
+      scenarioIds: ['sc.linux.service-down', 'sc.linux.disk-full'],
+    },
   ],
 }
 

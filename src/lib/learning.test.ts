@@ -111,9 +111,9 @@ describe('lesson progress (1.x bug fixes)', () => {
     const d = emptyData()
     d.sessions.push(session({}), session({}), session({}))
     const p = languageProgress(d, 'python')
-    expect(p.total).toBe(5)
+    expect(p.total).toBe(12)
     expect(p.passed).toBe(1)
-    expect(p.percent).toBe(20)
+    expect(p.percent).toBe(Math.round((1 / 12) * 100))
   })
 
   it('does not count attempts that ended with mistakes as completed', () => {

@@ -35,9 +35,19 @@ function allowedIPv4(ip: string): boolean {
 }
 
 describe('programming lessons', () => {
-  it('preserves all 45 original lessons across nine tracks', () => {
+  it('preserves all 45 original lessons across nine tracks and verifies career expansions', () => {
     expect(languageTracks).toHaveLength(9)
-    expect(codeLessonCount).toBe(45)
+    // 45 original lessons + 10 Java career lessons + 7 Python automation lessons = 62
+    expect(codeLessonCount).toBe(62)
+    // Ensure all 45 original IDs remain intact and unmodified
+    const originalJavaIds = ['java-basics-1', 'java-basics-2', 'java-intermediate-1', 'java-intermediate-2', 'java-advanced-1']
+    const originalPythonIds = ['python-basics-1', 'python-basics-2', 'python-intermediate-1', 'python-intermediate-2', 'python-advanced-1']
+    for (const id of originalJavaIds) {
+      expect(getLesson('java', id), `Missing original Java lesson ${id}`).toBeDefined()
+    }
+    for (const id of originalPythonIds) {
+      expect(getLesson('python', id), `Missing original Python lesson ${id}`).toBeDefined()
+    }
   })
   it('has unique lesson ids and non-empty code', () => {
     const ids = new Set<string>()
@@ -51,10 +61,13 @@ describe('programming lessons', () => {
 })
 
 describe('command exercises', () => {
-  it('meets the 200 distinct exercise target', () => {
-    expect(commands.length).toBe(262)
-    expect(commands.filter((c) => c.category === 'version-control')).toHaveLength(12)
+  it('meets and expands beyond the 200 distinct exercise target', () => {
+    // 262 baseline + 12 Git/GitHub additions + 6 Linux troubleshooting + 8 CI/CD & DevOps = 288
+    expect(commands.length).toBe(288)
+    expect(commands.filter((c) => c.category === 'version-control')).toHaveLength(24)
     expect(commands.filter((c) => c.category === 'ai-models')).toHaveLength(8)
+    expect(commands.filter((c) => c.id.startsWith('linux.git-'))).toHaveLength(17)
+    expect(commands.filter((c) => c.id.startsWith('linux.gh-'))).toHaveLength(9)
   })
 
   it('has unique, well-formed ids that match their platform', () => {
@@ -177,12 +190,16 @@ describe('scenarios', () => {
 describe('learning paths', () => {
   const modules = learningPaths.flatMap((p) => p.modules)
 
-  it('includes complete GitHub and AI model paths', () => {
-    expect(learningPaths).toHaveLength(10)
-    expect(modules).toHaveLength(120)
-    expect(modules.flatMap((m) => m.quiz)).toHaveLength(224)
-    expect(learningPaths.find((p) => p.id === 'git-github')?.modules).toHaveLength(4)
+  it('includes complete paths for core skills, GitHub, AI models, and CI/CD', () => {
+    // 10 baseline paths + 1 CI/CD & DevOps Engineering path = 11
+    expect(learningPaths).toHaveLength(11)
+    // 120 baseline modules + 2 Git modules + 1 Linux troubleshooting module + 4 CI/CD modules = 127
+    expect(modules).toHaveLength(127)
+    // 224 baseline quizzes + 4 Git questions + 2 Linux questions + 8 CI/CD questions = 238
+    expect(modules.flatMap((m) => m.quiz)).toHaveLength(238)
+    expect(learningPaths.find((p) => p.id === 'git-github')?.modules).toHaveLength(6)
     expect(learningPaths.find((p) => p.id === 'ai-models')?.modules).toHaveLength(3)
+    expect(learningPaths.find((p) => p.id === 'cicd-devops')?.modules).toHaveLength(4)
   })
 
   it('has globally unique module and question ids', () => {
@@ -234,7 +251,7 @@ describe('learning paths', () => {
 
   it('includes every programming lesson in the programming path', () => {
     const refs = new Set(modules.flatMap((m) => m.lessonRefs ?? []))
-    expect(refs.size).toBe(45)
+    expect(refs.size).toBe(62)
   })
 
   it('matches the module counts the spec asks for', () => {

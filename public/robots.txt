@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /CodeRush/
+Sitemap: https://eskinder185.github.io/CodeRush/sitemap.xml

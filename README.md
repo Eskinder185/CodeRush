@@ -8,6 +8,10 @@ CodeRush is a free, browser-based practice platform for people who work with cod
 - **Structured learning**: learning paths with concepts, guided lessons, quizzes, recall checks, and scenarios.
 - **Practical technical skills**: a Command Lab for Linux, PowerShell, Windows networking, and Cisco IOS, with a safe simulated terminal.
 
+## CodeRush 3 development branch
+
+This branch adds optional three-question onboarding, five career journeys that reuse existing paths, a goal-based Today plan, due command review, three synthetic troubleshooting missions, stateful Linux file navigation in the terminal, and saved mission scores. Module completion still accepts a 50% quiz result; mastery now also requires at least 80% on the quiz when one exists. See [features](docs/CODERUSH_3_FEATURES.md), [architecture](docs/CODERUSH_3_ARCHITECTURE.md), and [test results](docs/CODERUSH_3_TEST_RESULTS.md).
+
 Live site: <https://eskinder185.github.io/CodeRush/>
 
 ## What is included
@@ -49,6 +53,8 @@ There are no accounts, analytics, or backend. Progress is stored in the browser'
 
 CodeRush 1.x progress (`coderush_user_stats`) is migrated automatically on first load. The old key is left in place as a backup.
 
+CodeRush 2 progress (`coderush:data:v2`) is migrated to the version 3 key without deleting the previous key. Version 2 exports remain importable. The Progress page previews imports before changing saved data.
+
 ## Development
 
 Requirements: Node.js 20 or newer.
@@ -89,7 +95,7 @@ See [docs/CONTENT.md](docs/CONTENT.md) for how to add commands, scenarios, and m
 
 ## Deployment
 
-One workflow, `.github/workflows/deploy-pages.yml`, runs type checking, linting, unit tests, the build, and browser tests on every push and pull request. On `main` it uploads `dist/` and deploys with the GitHub Pages Actions. In the repository settings, Pages must use **GitHub Actions** as its source.
+One workflow, `.github/workflows/deploy-pages.yml`, runs type checking, linting, unit tests, the build, and browser tests on pull requests and pushes to the remote React `main`. On `main` it uploads `dist/` and deploys with GitHub Pages Actions. The separate local `main` worktree contains other unpushed work and is not modified by this branch. In repository settings, Pages must use **GitHub Actions** as its source.
 
 The site is served from `/CodeRush/`. Vite's `base` and the router's `basename` both come from that one setting in `vite.config.ts`. The build copies `index.html` to `404.html`, so deep links such as `/CodeRush/lab/command/linux.pwd` load the app.
 

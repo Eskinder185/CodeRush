@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
-const WIDTHS = [320, 375, 390, 430, 768, 1024, 1440, 1920]
-const PAGES = ['', 'learn', 'learn/networking', 'learn/networking/net.subnetting', 'practice', 'lab', 'lab/command/linux.ip-addr-show', 'lab/scenario/sc.linux.dns-fail', 'tools/subnetting', 'tools/topology', 'challenges', 'progress', 'languages/python/lessons', 'about']
+const WIDTHS = [320, 360, 375, 390, 430, 768, 1024, 1440, 1920]
+const PAGES = ['', 'today', 'journeys', 'journeys/network', 'missions', 'missions/internet-down', 'learn', 'learn/networking', 'learn/networking/net.subnetting', 'practice', 'lab', 'lab/command/linux.ip-addr-show', 'lab/scenario/sc.linux.dns-fail', 'tools/subnetting', 'tools/topology', 'challenges', 'progress', 'languages/python/lessons', 'about']
 
 async function noHorizontalOverflow(page: Page) {
   return page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
@@ -97,10 +97,52 @@ test.describe('keyboard-only flows', () => {
     await input.press('ArrowUp')
     await expect(input).toHaveValue('pwd')
   })
+
+  test('onboarding recommends a real path and survives refresh', async ({ page }) => {
+    await page.goto('')
+    await page.getByRole('button', { name: 'Start my learning journey' }).click()
+    await page.getByRole('button', { name: 'Networking & IT Support' }).click()
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await page.getByRole('button', { name: 'Some experience' }).click()
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await page.getByRole('button', { name: '20 minutes' }).click()
+    await page.getByRole('button', { name: 'See my path' }).click()
+    await expect(page.getByRole('link', { name: /Open recommended path/ })).toHaveAttribute('href', '/CodeRush/learn/networking')
+    await page.reload()
+    await expect(page.getByText('20 minutes a day', { exact: false })).toBeVisible()
+  })
+
+  test('terminal navigation changes the virtual working directory', async ({ page }) => {
+    await page.goto('lab')
+    const input = page.getByLabel(/Command input/)
+    await input.fill('cd /var/log')
+    await input.press('Enter')
+    await expect(page.getByRole('log')).toContainText('Working directory: /var/log')
+    await input.fill('pwd')
+    await input.press('Enter')
+    await expect(page.getByRole('log')).toContainText('student@coderush:/var/log$ pwd')
+    await input.fill('cat syslog')
+    await input.press('Enter')
+    await expect(page.getByRole('log')).toContainText('resolver timed out')
+  })
+
+  test('mission accepts evidence in any order and saves its score', async ({ page }) => {
+    await page.goto('missions/internet-down')
+    await page.getByRole('button', { name: /Query DNS/ }).click()
+    await page.getByRole('button', { name: /Test the gateway/ }).click()
+    await page.getByRole('button', { name: /Inspect IP configuration/ }).click()
+    await page.getByRole('button', { name: /Test DNS host connectivity/ }).click()
+    await page.getByRole('button', { name: /The DNS service is failing/ }).click()
+    await page.getByRole('button', { name: /Escalate the DNS failure/ }).click()
+    await page.getByRole('button', { name: /Run verification/ }).click()
+    await expect(page.getByRole('heading', { name: 'Mission complete · 100/100' })).toBeVisible()
+    await page.goto('missions')
+    await expect(page.getByText('Best score: 100/100')).toBeVisible()
+  })
 })
 
 test.describe('accessibility', () => {
-  for (const p of ['', 'learn/linux', 'learn/linux/linux.navigation', 'practice', 'lab', 'lab/command/linux.ss-tuln', 'lab/scenario/sc.ps.port-test', 'tools/subnetting', 'progress', 'faq']) {
+  for (const p of ['', 'today', 'journeys', 'journeys/network', 'missions', 'missions/internet-down', 'learn/linux', 'learn/linux/linux.navigation', 'practice', 'lab', 'lab/command/linux.ss-tuln', 'lab/scenario/sc.ps.port-test', 'tools/subnetting', 'progress', 'faq']) {
     test(`no serious axe violations on /${p}`, async ({ page }) => {
       await page.goto(p)
       await page.getByRole('heading', { level: 1 }).first().waitFor()

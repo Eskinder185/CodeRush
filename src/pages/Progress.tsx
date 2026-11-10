@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Download, Upload, Trash2, Sparkles, Award, Flag, Target, Zap, Code2, Terminal, TerminalSquare, Network, ShieldCheck, CalendarDays, Braces, Trophy, Lock, Info } from 'lucide-react'
-import { Button, ButtonLink, Dialog, EmptyState, PageHeader, ProgressBar, Segmented, Stat, useToast } from '../components/ui'
+import { Download, Upload, Trash2, Sparkles, Award, Flag, Target, Zap, Code2, Terminal, TerminalSquare, Network, ShieldCheck, CalendarDays, Braces, Trophy, Lock, Info, Brain } from 'lucide-react'
+import { Button, ButtonLink, Dialog, EmptyState, PageHeader, ProgressBar, Segmented, Stat, Tag, useToast } from '../components/ui'
 import { LineChart, BarChart, type Point } from '../components/charts/Charts'
 import { VirtualKeyboard } from '../components/typing/VirtualKeyboard'
 import { usePageMeta } from '../app/context'
@@ -11,6 +11,7 @@ import { formatDuration, languageProgress, overallStats, typingSessions, weekKey
 import { findConfusions, findWeaknesses, keyErrorRates } from '../lib/recommend'
 import { achievements } from '../lib/achievements'
 import { commandMastery } from '../lib/mastery'
+import { getCommandReviews, commandReviewSummary } from '../lib/review'
 import { readWeeklyGoal, saveWeeklyGoal, weeklyPracticeMinutes, WEEKLY_GOALS, type WeeklyGoalMinutes } from '../lib/weekly'
 import { languageTracks } from '../content/code'
 import { commands, getCommand } from '../content/commands'
@@ -136,6 +137,45 @@ export default function Progress() {
       .sort((a, b) => b.avg - a.avg)
   }, [data.commands])
   const topMissed = [...keyStats.entries()].filter(([, s]) => s.attempts >= 5 && s.errors > 0).sort((a, b) => b[1].rate - a[1].rate).slice(0, 5)
+
+  const [cmdSearch, setCmdSearch] = useState('')
+  const [cmdPlatform, setCmdPlatform] = useState<string>('all')
+  const [cmdStatus, setCmdStatus] = useState<'all' | 'due' | 'learning' | 'practiced' | 'mastered' | 'confused'>('all')
+  const [cmdSort, setCmdSort] = useState<'due' | 'recent' | 'mastery-desc' | 'mastery-asc' | 'confusions'>('due')
+  const [cmdPage, setCmdPage] = useState(0)
+  const CMD_PAGE_SIZE = 10
+
+  const allReviews = useMemo(() => getCommandReviews(data), [data])
+  const reviewSummary = useMemo(() => commandReviewSummary(allReviews), [allReviews])
+
+  const filteredReviews = useMemo(() => {
+    return allReviews.filter((r) => {
+      if (cmdPlatform !== 'all' && r.platform !== cmdPlatform) return false
+      if (cmdStatus === 'due' && !r.isDue) return false
+      if (cmdStatus === 'learning' && r.masteryLevel !== 'learning') return false
+      if (cmdStatus === 'practiced' && r.masteryLevel !== 'practiced') return false
+      if (cmdStatus === 'mastered' && r.masteryLevel !== 'mastered') return false
+      if (cmdStatus === 'confused' && r.confusions.length === 0) return false
+      if (cmdSearch.trim()) {
+        const q = cmdSearch.toLowerCase()
+        return r.command.toLowerCase().includes(q) || r.title.toLowerCase().includes(q)
+      }
+      return true
+    }).sort((a, b) => {
+      if (cmdSort === 'due') {
+        if (a.isDue && !b.isDue) return -1
+        if (!a.isDue && b.isDue) return 1
+        return a.nextReviewDate.getTime() - b.nextReviewDate.getTime()
+      }
+      if (cmdSort === 'recent') return b.lastPracticedDate.getTime() - a.lastPracticedDate.getTime()
+      if (cmdSort === 'mastery-desc') return b.masteryScore - a.masteryScore
+      if (cmdSort === 'mastery-asc') return a.masteryScore - b.masteryScore
+      if (cmdSort === 'confusions') return b.confusions.reduce((s, c) => s + c.count, 0) - a.confusions.reduce((s, c) => s + c.count, 0)
+      return 0
+    })
+  }, [allReviews, cmdPlatform, cmdStatus, cmdSearch, cmdSort])
+
+  const cmdPageRows = filteredReviews.slice(cmdPage * CMD_PAGE_SIZE, cmdPage * CMD_PAGE_SIZE + CMD_PAGE_SIZE)
 
   const history = [...data.sessions].reverse().filter((s) => kindFilter === 'all' || s.kind === kindFilter)
   const PAGE = 15
@@ -333,6 +373,236 @@ export default function Progress() {
             )
           })}
         </ul>
+      </section>
+
+      <section id="command-reviews" className="mt-10 scroll-mt-24" aria-labelledby="cmd-rev-h">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 id="cmd-rev-h" className="text-h2">Command review history</h2>
+            <p className="mt-1 text-sm text-fg-subtle">
+              Track what you reviewed, typing and recall accuracy, next spaced review dates, and command confusions.
+            </p>
+          </div>
+          {reviewSummary.due > 0 && (
+            <ButtonLink to="/today" size="sm" variant="primary">
+              <Brain className="h-4 w-4" aria-hidden /> Review {reviewSummary.due} due command{reviewSummary.due === 1 ? '' : 's'}
+            </ButtonLink>
+          )}
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="panel p-3">
+            <span className="text-xs text-fg-subtle">Practiced</span>
+            <div className="text-xl font-semibold">{reviewSummary.total}</div>
+          </div>
+          <div className="panel p-3">
+            <span className="text-xs text-fg-subtle">Due now</span>
+            <div className={`text-xl font-semibold ${reviewSummary.due > 0 ? 'text-warn' : 'text-ok'}`}>{reviewSummary.due}</div>
+          </div>
+          <div className="panel p-3">
+            <span className="text-xs text-fg-subtle">Mastered</span>
+            <div className="text-xl font-semibold text-accent">{reviewSummary.mastered}</div>
+          </div>
+          <div className="panel p-3">
+            <span className="text-xs text-fg-subtle">Recall success</span>
+            <div className="text-xl font-semibold">{reviewSummary.avgRecallRate}%</div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <input
+            type="search"
+            value={cmdSearch}
+            onChange={(e) => { setCmdSearch(e.target.value); setCmdPage(0) }}
+            placeholder="Filter reviewed commands..."
+            className="h-9 rounded-md border border-line-strong bg-surface px-3 text-sm text-fg focus:border-accent focus:outline-none"
+            aria-label="Filter reviewed commands"
+          />
+          <select
+            value={cmdPlatform}
+            onChange={(e) => { setCmdPlatform(e.target.value); setCmdPage(0) }}
+            className="h-9 rounded-md border border-line-strong bg-surface px-2 text-sm text-fg"
+            aria-label="Filter by platform"
+          >
+            <option value="all">All platforms</option>
+            <option value="linux">Linux</option>
+            <option value="powershell">PowerShell</option>
+            <option value="windows-cmd">Windows CMD</option>
+            <option value="cisco-ios">Cisco IOS</option>
+          </select>
+          <select
+            value={cmdStatus}
+            onChange={(e) => { setCmdStatus(e.target.value as typeof cmdStatus); setCmdPage(0) }}
+            className="h-9 rounded-md border border-line-strong bg-surface px-2 text-sm text-fg"
+            aria-label="Filter by review status"
+          >
+            <option value="all">All statuses</option>
+            <option value="due">Due for review</option>
+            <option value="learning">Learning (&lt;40)</option>
+            <option value="practiced">Practiced (40-79)</option>
+            <option value="mastered">Mastered (80+)</option>
+            <option value="confused">Has confusions</option>
+          </select>
+          <select
+            value={cmdSort}
+            onChange={(e) => { setCmdSort(e.target.value as typeof cmdSort); setCmdPage(0) }}
+            className="h-9 rounded-md border border-line-strong bg-surface px-2 text-sm text-fg"
+            aria-label="Sort commands"
+          >
+            <option value="due">Sort: Review due date</option>
+            <option value="recent">Sort: Recently practiced</option>
+            <option value="mastery-desc">Sort: Highest mastery</option>
+            <option value="mastery-asc">Sort: Lowest mastery</option>
+            <option value="confusions">Sort: Most confusions</option>
+          </select>
+        </div>
+
+        {filteredReviews.length === 0 ? (
+          <div className="mt-4 panel panel-pad text-center">
+            <p className="text-sm text-fg-muted">
+              {allReviews.length === 0
+                ? 'No commands practiced yet. Try exercises in the Command Lab or Recall Mode to start spaced review.'
+                : 'No commands match the selected filters.'}
+            </p>
+            {allReviews.length === 0 && (
+              <ButtonLink to="/lab" size="sm" className="mt-3">Go to Command Lab</ButtonLink>
+            )}
+          </div>
+        ) : (
+          <>
+            <ul className="mt-4 space-y-3 md:hidden" aria-label="Command review cards">
+              {cmdPageRows.map((r) => (
+                <li key={r.id} className="panel p-3 text-sm">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <code className="font-mono font-semibold text-fg">{r.command}</code>
+                      <p className="text-xs text-fg-muted">{r.title}</p>
+                    </div>
+                    {r.isDue ? (
+                      <Tag tone="warn">Due now</Tag>
+                    ) : (
+                      <span className="text-2xs text-fg-subtle">Due in {r.daysUntilDue}d</span>
+                    )}
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-fg-subtle">Mastery:</span>{' '}
+                      <span className="font-semibold">{r.masteryScore}%</span> ({r.masteryLevel})
+                    </div>
+                    <div>
+                      <span className="text-fg-subtle">Recall:</span>{' '}
+                      <span className="font-medium">{r.recallSuccess}/{r.recallAttempts} ({r.recallRate}%)</span>
+                    </div>
+                    <div>
+                      <span className="text-fg-subtle">Typing best:</span>{' '}
+                      <span className="font-medium">{r.typedBestAccuracy}% ({r.typedPerfect} perfect)</span>
+                    </div>
+                    <div>
+                      <span className="text-fg-subtle">Practiced:</span>{' '}
+                      <span>{new Date(r.lastPracticed).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  {r.confusions.length > 0 && (
+                    <div className="mt-2.5 rounded bg-warn/10 p-1.5 text-xs text-warn">
+                      ⚠️ Confused with <code className="font-mono">{r.confusions[0].otherCommand}</code> ({r.confusions[0].count}×)
+                    </div>
+                  )}
+
+                  <div className="mt-3 flex justify-end">
+                    <ButtonLink to={`/lab/command/${r.id}`} size="sm" variant={r.isDue ? 'primary' : 'secondary'}>
+                      Practice
+                    </ButtonLink>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-4 hidden overflow-x-auto rounded-lg border border-line md:block" tabIndex={0} aria-label="Command review history table">
+              <table className="w-full min-w-[50rem] text-sm">
+                <thead className="bg-elevated text-left text-xs text-fg-subtle">
+                  <tr>
+                    <th className="px-3 py-2 font-medium">Command</th>
+                    <th className="px-3 py-2 font-medium">Platform</th>
+                    <th className="px-3 py-2 font-medium">Last practiced</th>
+                    <th className="px-3 py-2 font-medium">Recall results</th>
+                    <th className="px-3 py-2 font-medium">Typing results</th>
+                    <th className="px-3 py-2 font-medium">Mastery</th>
+                    <th className="px-3 py-2 font-medium">Next review</th>
+                    <th className="px-3 py-2 font-medium">Mistakes / Confusions</th>
+                    <th className="px-3 py-2 font-medium text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="tabular-nums">
+                  {cmdPageRows.map((r) => (
+                    <tr key={r.id} className="border-t border-line hover:bg-surface/50">
+                      <td className="px-3 py-2">
+                        <Link to={`/lab/command/${r.id}`} className="font-mono font-medium text-fg hover:text-accent">
+                          {r.command}
+                        </Link>
+                        <p className="max-w-[12rem] truncate text-2xs text-fg-subtle" title={r.title}>{r.title}</p>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <Tag tone="accent">{PLATFORM_LABEL[r.platform]}</Tag>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-fg-subtle text-xs">
+                        {new Date(r.lastPracticed).toLocaleDateString()}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs">
+                        <div>{r.recallSuccess} / {r.recallAttempts} ({r.recallRate}%)</div>
+                        {r.lastRecallCorrect === true && <span className="text-2xs text-ok">✓ Latest correct</span>}
+                        {r.lastRecallCorrect === false && <span className="text-2xs text-warn">✕ Latest missed</span>}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs">
+                        <div>Best: {r.typedBestAccuracy}%</div>
+                        <div className="text-2xs text-fg-subtle">{r.typedPerfect} perfect</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="font-medium">{r.masteryScore}%</div>
+                        <div className="text-2xs text-fg-subtle capitalize">{r.masteryLevel}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs">
+                        {r.isDue ? (
+                          <Tag tone="warn">Due now</Tag>
+                        ) : (
+                          <div>
+                            <div>{r.nextReviewDate.toLocaleDateString()}</div>
+                            <div className="text-2xs text-fg-subtle">in {r.daysUntilDue}d ({r.intervalDays}d interval)</div>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-xs">
+                        {r.confusions.length > 0 ? (
+                          <div className="text-warn">
+                            <span title={`Mixed up with ${r.confusions.map((c) => `${c.otherCommand} (${c.count}×)`).join(', ')}`}>
+                              Confused with <code className="font-mono font-semibold">{r.confusions[0].otherCommand}</code> ({r.confusions[0].count}×)
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-fg-subtle">None logged</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-right whitespace-nowrap">
+                        <ButtonLink to={`/lab/command/${r.id}`} size="sm" variant={r.isDue ? 'primary' : 'secondary'}>
+                          Review
+                        </ButtonLink>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {filteredReviews.length > CMD_PAGE_SIZE && (
+              <div className="mt-3 flex items-center gap-2 text-sm">
+                <Button size="sm" variant="secondary" disabled={cmdPage === 0} onClick={() => setCmdPage((p) => p - 1)}>Newer</Button>
+                <span className="text-fg-subtle">Page {cmdPage + 1} of {Math.ceil(filteredReviews.length / CMD_PAGE_SIZE)}</span>
+                <Button size="sm" variant="secondary" disabled={(cmdPage + 1) * CMD_PAGE_SIZE >= filteredReviews.length} onClick={() => setCmdPage((p) => p + 1)}>Older</Button>
+              </div>
+            )}
+          </>
+        )}
       </section>
 
       <section className="mt-10" aria-labelledby="hist-h">

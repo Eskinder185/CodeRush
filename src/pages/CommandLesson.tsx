@@ -12,6 +12,7 @@ import { findModule } from '../content/paths'
 import { CATEGORY_LABEL, PLATFORM_LABEL, type CommandExercise } from '../content/types'
 import { recordCommandTyped, recordRecall, recordSession, toggleFavorite, useAppData } from '../lib/storage/store'
 import { commandMastery } from '../lib/mastery'
+import { getCommandReview } from '../lib/review'
 import { answersFor, identify, matchesAny } from '../lib/terminal/match'
 import { createTerm, push, runBuiltin, runFree, SHELL_OF } from '../lib/terminal/simulator'
 import NotFound from './NotFound'
@@ -146,6 +147,7 @@ export default function CommandLesson() {
 
   if (!c) return <NotFound />
   const mastery = commandMastery(data.commands[c.id])
+  const commandReview = getCommandReview(data, c.id)
   const fav = data.favorites.includes(c.id)
   const linkedScenarios = scenarios.filter((s) => s.steps.some((st) => st.commandIds?.includes(c.id)))
   const siblings = mod?.module.commandIds ?? []
@@ -340,33 +342,95 @@ export default function CommandLesson() {
 
         {step === 6 && (
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="panel panel-pad">
-              <div className="flex items-baseline justify-between">
-                <h2 className="text-h3">Your mastery</h2>
-                <span className="text-2xl font-semibold">{mastery.score}</span>
+            <div className="space-y-5">
+              <div className="panel panel-pad">
+                <div className="flex items-baseline justify-between">
+                  <h2 className="text-h3">Your mastery</h2>
+                  <span className="text-2xl font-semibold">{mastery.score}</span>
+                </div>
+                <ul className="mt-4 space-y-3">
+                  {mastery.parts.map((p) => (
+                    <li key={p.label}>
+                      <div className="mb-1 flex justify-between text-xs">
+                        <span className="text-fg-muted">
+                          {p.label} ({Math.round(p.weight * 100)}%)
+                        </span>
+                        <span className="text-fg-subtle">{Math.round(p.value * 100)}%</span>
+                      </div>
+                      <ProgressBar value={p.value * 100} label={p.label} size="sm" />
+                      <p className="mt-1 text-2xs text-fg-subtle">{p.detail}</p>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-4 flex gap-2 text-sm text-fg-muted">
+                  <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-warn" aria-hidden />
+                  {mastery.level === 'mastered'
+                    ? 'Mastered. Spaced review will schedule a refresher in two weeks.'
+                    : (data.commands[c.id]?.recallSuccess ?? 0) === 0
+                      ? 'Next: recall it from memory. Recall is worth the most.'
+                      : 'Next: practice it again on another day to build repetition.'}
+                </p>
               </div>
-              <ul className="mt-4 space-y-3">
-                {mastery.parts.map((p) => (
-                  <li key={p.label}>
-                    <div className="mb-1 flex justify-between text-xs">
-                      <span className="text-fg-muted">
-                        {p.label} ({Math.round(p.weight * 100)}%)
-                      </span>
-                      <span className="text-fg-subtle">{Math.round(p.value * 100)}%</span>
+
+              {commandReview ? (
+                <div className="panel panel-pad space-y-3" aria-labelledby="review-history-heading">
+                  <div className="flex items-center justify-between">
+                    <h2 id="review-history-heading" className="text-h3">Review history & schedule</h2>
+                    {commandReview.isDue ? (
+                      <Tag tone="warn">Due for review</Tag>
+                    ) : (
+                      <Tag tone="accent">Next in {commandReview.daysUntilDue}d</Tag>
+                    )}
+                  </div>
+                  <dl className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <dt className="text-fg-subtle">Last practiced</dt>
+                      <dd className="font-medium text-fg">{new Date(commandReview.lastPracticed).toLocaleDateString()}</dd>
                     </div>
-                    <ProgressBar value={p.value * 100} label={p.label} size="sm" />
-                    <p className="mt-1 text-2xs text-fg-subtle">{p.detail}</p>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 flex gap-2 text-sm text-fg-muted">
-                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-warn" aria-hidden />
-                {mastery.level === 'mastered'
-                  ? 'Mastered. Come back in a few days to keep it fresh.'
-                  : (data.commands[c.id]?.recallSuccess ?? 0) === 0
-                    ? 'Next: recall it from memory. Recall is worth the most.'
-                    : 'Next: practice it again on another day to build repetition.'}
-              </p>
+                    <div>
+                      <dt className="text-fg-subtle">Next review date</dt>
+                      <dd className="font-medium text-fg">{commandReview.nextReviewDate.toLocaleDateString()} ({commandReview.intervalDays}d interval)</dd>
+                    </div>
+                    <div>
+                      <dt className="text-fg-subtle">Recall results</dt>
+                      <dd className="font-medium text-fg">
+                        {commandReview.recallSuccess} / {commandReview.recallAttempts} ({commandReview.recallRate}%)
+                        {commandReview.lastRecallCorrect === true && <span className="ml-1 text-ok">✓ pass</span>}
+                        {commandReview.lastRecallCorrect === false && <span className="ml-1 text-warn">✕ miss</span>}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-fg-subtle">Typing best</dt>
+                      <dd className="font-medium text-fg">
+                        {commandReview.typedBestAccuracy}% ({commandReview.typedPerfect} perfect)
+                      </dd>
+                    </div>
+                  </dl>
+
+                  {commandReview.confusions.length > 0 && (
+                    <div className="mt-3 rounded border border-warn/30 bg-warn/5 p-3">
+                      <p className="text-xs font-semibold text-warn">Repeated mistakes & confusions</p>
+                      <p className="mt-1 text-xs text-fg-muted">
+                        You previously confused this command with:
+                      </p>
+                      <ul className="mt-1.5 space-y-1">
+                        {commandReview.confusions.map((cf) => (
+                          <li key={cf.otherId} className="flex items-center justify-between text-xs">
+                            <span className="font-mono text-fg">{cf.otherCommand} ({cf.count}×)</span>
+                            <Link to={`/lab/command/${cf.otherId}`} className="text-accent hover:underline">
+                              Review other command
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="panel panel-pad text-sm text-fg-muted">
+                  Practice typing or recalling this command to start your review history and spaced review schedule.
+                </div>
+              )}
             </div>
             <div className="space-y-4">
               {c.related && c.related.length > 0 && (

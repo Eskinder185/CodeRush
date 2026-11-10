@@ -1,17 +1,19 @@
 # Changelog
 
-## CodeRush 3 development branch
+All notable changes to the CodeRush project.
 
-- Added optional local onboarding, career journeys, and a goal-based Today plan.
-- Added due command review scheduling based on recorded attempts and mastery.
-- Corrected review intervals to use the latest recall outcome, so an older mistake does not keep a command due every day forever.
-- Added a record-by-record import preview for sessions, commands, quizzes, scenarios, and missions, including duplicate IDs and projected totals.
-- Added a user-editable weekly practice-time goal based on recorded sessions.
-- Added Git and GitHub and AI Models and LLMs learning paths with 20 sourced CLI exercises and 14 quiz questions.
-- Added incident views to the network topology for DNS service failure and wrong VLAN assignment.
-- Added a safe virtual Linux directory and synthetic files to free terminal exploration.
-- Added five evidence-led troubleshooting missions with saved scores, including DHCP lease failure and incorrect VLAN assignment.
-- Added a version 2 to version 3 storage migration and import preview.
-- Raised the quiz evidence needed for module mastery to 80% while retaining 50% completion.
-- Added mobile history cards, SEO metadata, sitemap, and expanded browser coverage.
-- Removed the conflicting raw-source Pages workflow and moved Playwright preview off a conflicting local port.
+## CodeRush Latest
+
+### Consolidated Features & Fixes
+- **Unified Product & Branding**: Consolidated active codebase into single canonical repository at `C:\Users\eskew\github\CodeRush` with CodeRush branding throughout.
+- **Fixed React Update Depth Warning**: Traced and eliminated React's "Maximum update depth exceeded" re-render loop in `TypingSurface.tsx` by synchronizing input directly with the typing engine.
+- **Command Review History**: Added a dedicated review history dashboard and per-command review details tracking recall rates, typing best accuracy, next spaced review dates, and logged command confusions.
+- **Multi-Browser Verification**: Installed and verified Playwright across Chromium, desktop Firefox, and desktop WebKit (117 total passing tests).
+- **Incident Investigation Missions**: Delivered five evidence-led troubleshooting missions (DNS failure, full Linux filesystem, suspicious Windows scheduled task, DHCP lease timeout, and Cisco VLAN port misconfiguration).
+- **Git & GitHub Curriculum**: Added 12 command exercises covering repository inspection, branching, staging, committing, and pull requests via GitHub CLI.
+- **AI Models & LLM Curriculum**: Added 8 command exercises covering local model discovery, model cards, Ollama local inference, and Hugging Face CLI downloads.
+- **Stateful Virtual Terminal**: Implemented in-memory Linux virtual filesystem supporting `cd`, `pwd`, `ls`, and `cat`.
+- **Today Learning Plan**: Dynamically suggests due command reviews, detected typing weakness drills, and active journey modules based on actual saved performance.
+- **Weekly Practice Goal**: Added customizable weekly practice-time target on the Progress dashboard.
+- **Multi-Version Data Migration & Import Preview**: Safe migration path supporting CodeRush v1, v2, and v3 schemas with detailed pre-import impact comparison.
+- **Network Topology Incidents**: Added DNS failure and VLAN incident modes illustrating packet paths and device roles.

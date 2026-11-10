@@ -201,7 +201,20 @@ describe('practice', () => {
   })
 })
 
-describe('progress import', () => {
+describe('progress and review history', () => {
+  it('renders command review history with recall, typing, mastery, and confusions', async () => {
+    const { recordCommandTyped, recordRecall } = await import('../lib/storage/store')
+    recordCommandTyped('linux.pwd', 100, true)
+    recordRecall('linux.pwd', true)
+    recordRecall('linux.ip-addr-show', false, 'linux.traceroute')
+
+    go('/progress')
+    expect(await screen.findByRole('heading', { level: 2, name: /Command review history/i })).toBeInTheDocument()
+    expect(screen.getAllByText('pwd').length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/ip addr show/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Confused with/i).length).toBeGreaterThan(0)
+  })
+
   it('reports an invalid import file without changing data', async () => {
     go('/progress')
     await screen.findByRole('heading', { level: 1, name: /Your progress/i })

@@ -85,7 +85,6 @@ export const TypingSurface = forwardRef<TypingSurfaceHandle, Props>(function Typ
   const taRef = useRef<HTMLTextAreaElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const composing = useRef(false)
-  const [raw, setRaw] = useState('')
   const [focused, setFocused] = useState(false)
   const [announce, setAnnounce] = useState('')
   const inputId = useId()
@@ -96,11 +95,6 @@ export const TypingSurface = forwardRef<TypingSurfaceHandle, Props>(function Typ
   useEffect(() => {
     if (autoFocus) taRef.current?.focus({ preventScroll: true })
   }, [autoFocus])
-
-  // Keep the textarea mirror in sync with the engine except during IME composition.
-  useEffect(() => {
-    if (!composing.current) setRaw(engine.input)
-  }, [engine.input])
 
   const lines = useMemo(() => {
     const ls = engine.target.split('\n')
@@ -244,7 +238,7 @@ export const TypingSurface = forwardRef<TypingSurfaceHandle, Props>(function Typ
         <textarea
           id={inputId}
           ref={taRef}
-          value={raw}
+          value={engine.input}
           aria-describedby={descId}
           className="absolute bottom-0 left-0 h-px w-px resize-none overflow-hidden border-0 p-0 opacity-0"
           style={{ fontSize: 16 }}
@@ -271,10 +265,9 @@ export const TypingSurface = forwardRef<TypingSurfaceHandle, Props>(function Typ
             session.input(e.currentTarget.value, { composed: true })
           }}
           onChange={(e) => {
-            setRaw(e.target.value)
             if (composing.current) return
             const native = e.nativeEvent as InputEvent
-            session.input(e.target.value, { inputType: native.inputType })
+            session.input(e.target.value, { inputType: native?.inputType })
           }}
         />
         <p id={descId} className="sr-only">

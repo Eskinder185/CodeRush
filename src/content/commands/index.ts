@@ -9,6 +9,7 @@ import { windowsCmd } from './windows-cmd'
 import { ciscoIos } from './cisco-ios'
 import { gitGithub } from './git-github'
 import { aiModels } from './ai-models'
+import { cicdDevops } from './cicd-devops'
 
 export const commands: CommandExercise[] = [
   ...linuxCore,
@@ -21,6 +22,7 @@ export const commands: CommandExercise[] = [
   ...ciscoIos,
   ...gitGithub,
   ...aiModels,
+  ...cicdDevops,
 ]
 
 const byId = new Map(commands.map((c) => [c.id, c]))

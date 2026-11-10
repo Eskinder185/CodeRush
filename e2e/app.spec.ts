@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
 const WIDTHS = [320, 360, 375, 390, 430, 768, 1024, 1440, 1920]
-const PAGES = ['', 'today', 'journeys', 'journeys/network', 'missions', 'missions/internet-down', 'learn', 'learn/networking', 'learn/networking/net.subnetting', 'learn/git-github', 'learn/ai-models', 'practice', 'practice/ai', 'lab', 'lab/command/linux.ip-addr-show', 'lab/command/linux.git-status', 'lab/command/linux.ollama-ls', 'lab/scenario/sc.linux.dns-fail', 'tools/subnetting', 'tools/topology', 'tools/topology?incident=vlan', 'challenges', 'progress', 'languages/python/lessons', 'about']
+const PAGES = ['', 'today', 'journeys', 'journeys/network', 'missions', 'missions/internet-down', 'skills', 'learn', 'learn/networking', 'learn/networking/net.subnetting', 'learn/git-github', 'learn/ai-models', 'learn/cicd-devops', 'practice', 'practice/ai', 'lab', 'lab/command/linux.ip-addr-show', 'lab/command/linux.git-status', 'lab/command/linux.ollama-ls', 'lab/scenario/sc.linux.dns-fail', 'tools/subnetting', 'tools/topology', 'tools/topology?incident=vlan', 'challenges', 'progress', 'languages/python/lessons', 'about']
 
 async function noHorizontalOverflow(page: Page) {
   return page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)

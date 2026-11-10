@@ -75,6 +75,150 @@ export const javaTrack: LanguageTrack = {
         "super()",
         "method overriding"
       ]
+    },
+    {
+      "id": "java-career-interfaces",
+      "title": "Interfaces and Default Methods",
+      "description": "Define contracts with modern Java interfaces, default methods, and static helpers.",
+      "difficulty": "intermediate",
+      "code": "public interface TaskNotifier {\n    void notifyUser(String recipient, String message);\n\n    default void broadcastAlert(String alert) {\n        notifyUser(\"all-engineers@internal.net\", \"[ALERT] \" + alert);\n    }\n\n    static boolean isValidRecipient(String email) {\n        return email != null && email.contains(\"@\");\n    }\n}\n\nclass EmailNotifier implements TaskNotifier {\n    @Override\n    public void notifyUser(String recipient, String message) {\n        if (TaskNotifier.isValidRecipient(recipient)) {\n            System.out.println(\"Delivering mail to \" + recipient + \": \" + message);\n        }\n    }\n}\n\npublic class NotifierApp {\n    public static void main(String[] args) {\n        TaskNotifier notifier = new EmailNotifier();\n        notifier.broadcastAlert(\"Scheduled maintenance at 02:00 UTC\");\n    }\n}",
+      "expectedTime": 10,
+      "concepts": [
+        "interface",
+        "default methods",
+        "static methods",
+        "polymorphic contracts"
+      ]
+    },
+    {
+      "id": "java-career-generics",
+      "title": "Generics and Type Safety",
+      "description": "Build type-safe generic classes and methods to eliminate unsafe casting.",
+      "difficulty": "intermediate",
+      "code": "public class ApiResponse<T> {\n    private final boolean success;\n    private final T data;\n    private final String error;\n\n    private ApiResponse(boolean success, T data, String error) {\n        this.success = success;\n        this.data = data;\n        this.error = error;\n    }\n\n    public static <T> ApiResponse<T> ok(T data) {\n        return new ApiResponse<>(true, data, null);\n    }\n\n    public static <T> ApiResponse<T> fail(String message) {\n        return new ApiResponse<>(false, null, message);\n    }\n\n    public boolean isSuccess() {\n        return success;\n    }\n\n    public T getData() {\n        return data;\n    }\n\n    public String getError() {\n        return error;\n    }\n\n    public static void main(String[] args) {\n        ApiResponse<Integer> port = ApiResponse.ok(8080);\n        System.out.println(\"Port configured: \" + port.getData());\n    }\n}",
+      "expectedTime": 12,
+      "concepts": [
+        "generics",
+        "type parameters",
+        "factory methods",
+        "type safety"
+      ]
+    },
+    {
+      "id": "java-career-collections",
+      "title": "Collections: List, Set, and Map",
+      "description": "Use standard Java collections for indexing, uniqueness, and key-value lookups.",
+      "difficulty": "intermediate",
+      "code": "import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.HashSet;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\npublic class ServiceRegistry {\n    public static void main(String[] args) {\n        List<String> auditLog = new ArrayList<>();\n        auditLog.add(\"service-alpha registered\");\n        auditLog.add(\"service-beta registered\");\n\n        Set<String> activeNodes = new HashSet<>();\n        activeNodes.add(\"node-01\");\n        activeNodes.add(\"node-02\");\n        activeNodes.add(\"node-01\"); // duplicate ignored\n\n        Map<String, Integer> servicePorts = new HashMap<>();\n        servicePorts.put(\"auth\", 8081);\n        servicePorts.put(\"gateway\", 8080);\n\n        System.out.println(\"Total active nodes: \" + activeNodes.size());\n        System.out.println(\"Gateway port: \" + servicePorts.get(\"gateway\"));\n    }\n}",
+      "expectedTime": 12,
+      "concepts": [
+        "ArrayList",
+        "HashSet",
+        "HashMap",
+        "collections framework"
+      ]
+    },
+    {
+      "id": "java-career-streams",
+      "title": "Lambdas and Stream Pipelines",
+      "description": "Filter, map, and collect items using functional stream pipelines and predicates.",
+      "difficulty": "advanced",
+      "code": "import java.util.List;\nimport java.util.stream.Collectors;\n\npublic class MetricsFilter {\n    record MetricSample(String name, double latencyMs, boolean error) {}\n\n    public static void main(String[] args) {\n        List<MetricSample> samples = List.of(\n            new MetricSample(\"GET /health\", 4.2, false),\n            new MetricSample(\"POST /login\", 128.5, false),\n            new MetricSample(\"GET /reports\", 540.0, true)\n        );\n\n        List<String> slowHealthy = samples.stream()\n            .filter(s -> !s.error())\n            .filter(s -> s.latencyMs() > 100.0)\n            .map(s -> s.name() + \" took \" + s.latencyMs() + \"ms\")\n            .collect(Collectors.toList());\n\n        slowHealthy.forEach(System.out::println);\n    }\n}",
+      "expectedTime": 12,
+      "concepts": [
+        "lambdas",
+        "Stream API",
+        "filter",
+        "map",
+        "collect"
+      ]
+    },
+    {
+      "id": "java-career-optional",
+      "title": "Optional and Defensive API Design",
+      "description": "Handle absent values cleanly without throwing NullPointerException.",
+      "difficulty": "intermediate",
+      "code": "import java.util.HashMap;\nimport java.util.Map;\nimport java.util.Optional;\n\npublic class UserRepository {\n    private final Map<Long, String> users = new HashMap<>();\n\n    public void save(Long id, String email) {\n        users.put(id, email);\n    }\n\n    public Optional<String> findEmailById(Long id) {\n        return Optional.ofNullable(users.get(id));\n    }\n\n    public static void main(String[] args) {\n        UserRepository repo = new UserRepository();\n        repo.save(42L, \"dev@example.internal\");\n\n        String contact = repo.findEmailById(42L)\n            .map(String::toUpperCase)\n            .orElse(\"NO_CONTACT_FOUND\");\n\n        System.out.println(\"User email: \" + contact);\n    }\n}",
+      "expectedTime": 10,
+      "concepts": [
+        "Optional",
+        "ofNullable",
+        "orElse",
+        "null safety"
+      ]
+    },
+    {
+      "id": "java-career-records",
+      "title": "Records and Immutability",
+      "description": "Declare immutable data carriers with concise records, compact constructors, and validation.",
+      "difficulty": "intermediate",
+      "code": "public record DatabaseConfig(String host, int port, String database) {\n    public DatabaseConfig {\n        if (host == null || host.isBlank()) {\n            throw new IllegalArgumentException(\"Host cannot be empty\");\n        }\n        if (port < 1024 || port > 65535) {\n            throw new IllegalArgumentException(\"Port out of range: \" + port);\n        }\n    }\n\n    public String jdbcUrl() {\n        return \"jdbc:postgresql://\" + host + \":\" + port + \"/\" + database;\n    }\n\n    public static void main(String[] args) {\n        DatabaseConfig cfg = new DatabaseConfig(\"db-primary.internal\", 5432, \"orders\");\n        System.out.println(\"Connection string: \" + cfg.jdbcUrl());\n    }\n}",
+      "expectedTime": 10,
+      "concepts": [
+        "records",
+        "immutability",
+        "compact constructor",
+        "validation"
+      ]
+    },
+    {
+      "id": "java-career-junit",
+      "title": "Unit Testing with JUnit 5",
+      "description": "Write automated test cases, assertions, and parameterized tests with JUnit 5.",
+      "difficulty": "intermediate",
+      "code": "import org.junit.jupiter.api.Test;\nimport org.junit.jupiter.api.DisplayName;\nimport static org.junit.jupiter.api.Assertions.assertEquals;\nimport static org.junit.jupiter.api.Assertions.assertNotNull;\n\npublic class TaskValidatorTest {\n    record Task(String title, int priority) {}\n\n    boolean isValid(Task task) {\n        return task.title() != null && !task.title().isBlank() && task.priority() >= 1;\n    }\n\n    @Test\n    @DisplayName(\"Valid task passes business validation rule\")\n    void validTaskPasses() {\n        Task task = new Task(\"Build CI Pipeline\", 1);\n        assertNotNull(task);\n        assertEquals(true, isValid(task));\n    }\n}",
+      "expectedTime": 10,
+      "concepts": [
+        "JUnit 5",
+        "@Test",
+        "assertNotNull",
+        "assertEquals",
+        "automated testing"
+      ]
+    },
+    {
+      "id": "java-career-spring-controller",
+      "title": "Spring Boot REST Controller",
+      "description": "Build production RESTful endpoints with Spring Boot @RestController and @GetMapping.",
+      "difficulty": "advanced",
+      "code": "package com.example.coderush.controller;\n\nimport org.springframework.http.ResponseEntity;\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.PathVariable;\nimport org.springframework.web.bind.annotation.RequestMapping;\nimport org.springframework.web.bind.annotation.RestController;\nimport java.util.Map;\n\n@RestController\n@RequestMapping(\"/api/v1/health\")\npublic class HealthCheckController {\n\n    @GetMapping(\"/{component}\")\n    public ResponseEntity<Map<String, String>> checkStatus(@PathVariable String component) {\n        return ResponseEntity.ok(Map.of(\n            \"status\", \"UP\",\n            \"component\", component,\n            \"version\", \"1.0.0\"\n        ));\n    }\n}",
+      "expectedTime": 14,
+      "concepts": [
+        "Spring Boot",
+        "@RestController",
+        "@RequestMapping",
+        "ResponseEntity",
+        "REST APIs"
+      ]
+    },
+    {
+      "id": "java-career-spring-jpa",
+      "title": "Spring Data JPA Repository",
+      "description": "Persist and query database entities with Spring Data JPA and repository interfaces.",
+      "difficulty": "advanced",
+      "code": "package com.example.coderush.repository;\n\nimport jakarta.persistence.Entity;\nimport jakarta.persistence.GeneratedValue;\nimport jakarta.persistence.GenerationType;\nimport jakarta.persistence.Id;\nimport org.springframework.data.jpa.repository.JpaRepository;\nimport java.util.List;\n\n@Entity\nclass TaskItem {\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;\n    private String title;\n    private boolean completed;\n}\n\npublic interface TaskRepository extends JpaRepository<TaskItem, Long> {\n    List<TaskItem> findByCompleted(boolean completed);\n}",
+      "expectedTime": 14,
+      "concepts": [
+        "Spring Data JPA",
+        "JpaRepository",
+        "@Entity",
+        "@Id",
+        "PostgreSQL persistence"
+      ]
+    },
+    {
+      "id": "java-career-task-capstone",
+      "title": "Java Capstone: Task Service Implementation",
+      "description": "Complete service layer with constructor dependency injection, business validation, and DTO mapping.",
+      "difficulty": "advanced",
+      "code": "package com.example.coderush.service;\n\nimport org.springframework.stereotype.Service;\nimport java.time.Instant;\n\npublic record TaskDto(Long id, String title, Instant createdAt) {}\n\n@Service\npublic class TaskManagementService {\n    public TaskDto createTask(String title) {\n        if (title == null || title.trim().isEmpty()) {\n            throw new IllegalArgumentException(\"Task title must be provided\");\n        }\n        // Simulate persisting domain model and returning clean API DTO\n        return new TaskDto(101L, title.trim(), Instant.now());\n    }\n\n    public static void main(String[] args) {\n        TaskManagementService svc = new TaskManagementService();\n        TaskDto dto = svc.createTask(\"Deploy Task Management API\");\n        System.out.println(\"Created task #\" + dto.id() + \": \" + dto.title());\n    }\n}",
+      "expectedTime": 15,
+      "concepts": [
+        "Service layer",
+        "dependency injection",
+        "DTO pattern",
+        "REST API capstone"
+      ]
     }
   ]
 }

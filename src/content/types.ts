@@ -6,7 +6,19 @@
 
 export type Difficulty = 'beginner' | 'intermediate' | 'advanced'
 
-// ---------- Programming lessons (the original 45-lesson library) ----------
+// ---------- Programming lessons (the original 45-lesson library + career expansions) ----------
+
+export type ArtifactType =
+  | 'code'
+  | 'shell-command'
+  | 'yaml'
+  | 'dockerfile'
+  | 'sql'
+  | 'config'
+  | 'log'
+  | 'quiz'
+  | 'debugging'
+  | 'project-step'
 
 export interface CodeLesson {
   id: string
@@ -17,6 +29,7 @@ export interface CodeLesson {
   /** Estimated minutes. */
   expectedTime: number
   concepts: string[]
+  artifactType?: ArtifactType
 }
 
 export interface LanguageTrack {

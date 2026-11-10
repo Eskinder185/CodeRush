@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
 const WIDTHS = [320, 360, 375, 390, 430, 768, 1024, 1440, 1920]
-const PAGES = ['', 'today', 'journeys', 'journeys/network', 'missions', 'missions/internet-down', 'learn', 'learn/networking', 'learn/networking/net.subnetting', 'learn/git-github', 'learn/ai-models', 'practice', 'lab', 'lab/command/linux.ip-addr-show', 'lab/command/linux.git-status', 'lab/command/linux.ollama-ls', 'lab/scenario/sc.linux.dns-fail', 'tools/subnetting', 'tools/topology', 'tools/topology?incident=vlan', 'challenges', 'progress', 'languages/python/lessons', 'about']
+const PAGES = ['', 'today', 'journeys', 'journeys/network', 'missions', 'missions/internet-down', 'learn', 'learn/networking', 'learn/networking/net.subnetting', 'learn/git-github', 'learn/ai-models', 'practice', 'practice/ai', 'lab', 'lab/command/linux.ip-addr-show', 'lab/command/linux.git-status', 'lab/command/linux.ollama-ls', 'lab/scenario/sc.linux.dns-fail', 'tools/subnetting', 'tools/topology', 'tools/topology?incident=vlan', 'challenges', 'progress', 'languages/python/lessons', 'about']
 
 async function noHorizontalOverflow(page: Page) {
   return page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
@@ -200,5 +200,26 @@ test.describe('accessibility', () => {
       const r = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze()
       expect(r.violations.map((v) => `${p}: ${v.nodes.length} ${v.nodes[0]?.target.join(' ')}`)).toEqual([])
     }
+  })
+})
+
+test.describe('Bring Your Own AI Studio', () => {
+  test('opens AI Practice Studio, opens wizard, and shows provider cards', async ({ page }) => {
+    await page.goto('practice/ai')
+    await expect(page.getByRole('heading', { level: 1, name: /AI Practice Studio/i })).toBeVisible()
+    await expect(page.getByText(/Exercise Composer/i)).toBeVisible()
+
+    // Click Configure on status badge
+    await page.getByRole('button', { name: 'Configure', exact: true }).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByRole('button', { name: /Ollama/i })).toBeVisible()
+    await expect(dialog.getByRole('button', { name: /LM Studio/i })).toBeVisible()
+  })
+
+  test('navigates from Practice to AI Studio via mode card', async ({ page }) => {
+    await page.goto('practice')
+    await page.getByRole('radiogroup', { name: 'Practice mode' }).getByRole('link', { name: /AI Studio/i }).click()
+    await expect(page).toHaveURL(/.*practice\/ai/)
   })
 })

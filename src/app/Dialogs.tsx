@@ -1,6 +1,8 @@
-import type { ReactNode } from 'react'
-import { Dialog, Segmented, Kbd } from '../components/ui'
+import { useState, type ReactNode } from 'react'
+import { Dialog, Segmented, Kbd, Button } from '../components/ui'
 import { DEFAULT_SETTINGS, updateSettings, useSettings, type Settings } from '../lib/settings'
+import { AIConnectionWizard } from '../components/ai/AIConnectionWizard'
+import { loadAIConfig } from '../lib/ai/storage'
 
 function Row({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
@@ -32,6 +34,8 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
 export function SettingsDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const s = useSettings()
   const set = (p: Partial<Settings>) => updateSettings(p)
+  const [aiWizardOpen, setAiWizardOpen] = useState(false)
+  const aiConfig = loadAIConfig()
   return (
     <Dialog open={open} onClose={onClose} title="Settings" wide>
       <h3 className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">Appearance</h3>
@@ -66,11 +70,21 @@ export function SettingsDialog({ open, onClose }: { open: boolean; onClose: () =
       <Row label="Key sounds" hint="A quiet click, and a low tone on mistakes.">
         <Toggle label="Key sounds" checked={s.sound} onChange={(v) => set({ sound: v })} />
       </Row>
+      <h3 className="mt-6 text-xs font-semibold uppercase tracking-wider text-fg-subtle">Your AI Models</h3>
+      <Row
+        label="Bring Your Own AI (BYOAI)"
+        hint={aiConfig.model ? `Connected to ${aiConfig.model} (${aiConfig.provider})` : 'Connect local Ollama, LM Studio, or an AI gateway.'}
+      >
+        <Button size="sm" variant="secondary" onClick={() => setAiWizardOpen(true)}>
+          {aiConfig.model ? 'Configure Models' : 'Connect Model'}
+        </Button>
+      </Row>
       <div className="mt-5 flex justify-end">
         <button type="button" className="text-sm text-fg-subtle underline-offset-2 hover:text-fg hover:underline" onClick={() => updateSettings(DEFAULT_SETTINGS)}>
           Reset to defaults
         </button>
       </div>
+      <AIConnectionWizard open={aiWizardOpen} onClose={() => setAiWizardOpen(false)} />
     </Dialog>
   )
 }

@@ -21,6 +21,7 @@ export type SessionKind =
   | 'custom'
   | 'daily'
   | 'weakness'
+  | 'ai'
 
 export interface PracticeSession {
   id: string
@@ -113,6 +114,8 @@ export interface AppData {
   lastVisited?: { path: string; title: string; at: string }
   /** Set when data was migrated from CodeRush 1.x. */
   migratedFromV1?: { at: string; sessions: number }
+  /** Saved user practices generated with Bring Your Own AI. */
+  aiPractices?: import('../ai/types').AIPractice[]
 }
 
 export function emptyData(): AppData {
@@ -128,6 +131,7 @@ export function emptyData(): AppData {
     favorites: [],
     recent: [],
     subnet: { attempts: 0, correct: 0 },
+    aiPractices: [],
   }
 }
 
@@ -137,4 +141,5 @@ export const LIMITS = {
   recent: 20,
   successDays: 10,
   wpmSeries: 240,
+  aiPractices: 100,
 } as const

@@ -22,6 +22,7 @@ const CommandLab = lazy(() => import('./pages/CommandLab'))
 const CommandLesson = lazy(() => import('./pages/CommandLesson'))
 const ScenarioPage = lazy(() => import('./pages/ScenarioPage'))
 const Practice = lazy(() => import('./pages/Practice'))
+const AIPracticeStudio = lazy(() => import('./pages/AIPracticeStudio'))
 const Recall = lazy(() => import('./pages/Recall'))
 const Languages = lazy(() => import('./pages/Languages'))
 const LanguageLessons = lazy(() => import('./pages/LanguageLessons'))
@@ -143,7 +144,9 @@ function Shell() {
                   <Route path="/lab/command/:id" element={<CommandLesson />} />
                   <Route path="/lab/scenario/:id" element={<ScenarioPage />} />
                   <Route path="/practice" element={<Practice />} />
+                  <Route path="/practice/ai" element={<AIPracticeStudio />} />
                   <Route path="/practice/recall" element={<Recall />} />
+                  <Route path="/studio" element={<Navigate to="/practice/ai" replace />} />
                   <Route path="/languages" element={<Languages />} />
                   <Route path="/languages/:language/lessons" element={<LanguageLessons />} />
                   <Route path="/languages/:language/lesson/:lessonId" element={<LessonPractice />} />

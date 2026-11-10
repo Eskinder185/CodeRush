@@ -11,6 +11,7 @@ export const NAV = [
   { to: '/', label: 'Home', end: true },
   { to: '/learn', label: 'Learn' },
   { to: '/practice', label: 'Typing Practice' },
+  { to: '/practice/ai', label: 'AI Studio' },
   { to: '/lab', label: 'Command Lab' },
   { to: '/challenges', label: 'Challenges' },
   { to: '/progress', label: 'Progress' },

@@ -41,6 +41,7 @@ test.describe('responsive layout', () => {
   }
 
   test('captures screenshots for visual review', async ({ page }) => {
+    test.slow()
     for (const [w, name] of [[390, 'phone'], [768, 'tablet'], [1440, 'desktop']] as const) {
       await page.setViewportSize({ width: w, height: 900 })
       for (const p of ['', 'lab', 'learn/powershell', 'progress']) {

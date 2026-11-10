@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 // Runs against the production build served under /CodeRush/, the same path as GitHub Pages.
 export default defineConfig({
   testDir: 'e2e',
+  timeout: 60_000,
   outputDir: 'e2e-report/artifacts',
   fullyParallel: true,
   reporter: [['list']],

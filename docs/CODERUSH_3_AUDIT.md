@@ -23,7 +23,7 @@ The baseline has 45 programming lessons, 242 command exercises, 32 scenarios, ei
 
 ## Accessibility, responsive, and performance
 
-Automated axe checks on key routes found no serious or critical violations. Browser tests cover widths 320, 360, 375, 390, 430, 768, 1024, 1440, and 1920px without page overflow after fixes. Screenshot review covered home, Lab, a learning path, and Progress at phone, tablet, and desktop sizes. Manual screen-reader testing and Firefox/WebKit testing were not performed.
+Automated axe checks on key routes found no serious or critical violations. Browser tests cover widths 320, 360, 375, 390, 430, 768, 1024, 1440, and 1920px without page overflow after fixes. Screenshots were captured for home, Lab, a learning path, and Progress at phone, tablet, and desktop sizes; the phone home image was visually inspected. Manual screen-reader testing and Firefox/WebKit testing were not performed.
 
 The production build succeeds with `/CodeRush/` as the base and a `404.html` SPA fallback. Route, asset, and deep-link tests pass locally. Lighthouse, LCP, INP, and CLS were not measured; no performance target is claimed. The command content chunk remains about 288 kB before gzip and deserves later loading analysis.
 

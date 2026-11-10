@@ -6,6 +6,9 @@
 - Added due command review scheduling based on recorded attempts and mastery.
 - Corrected review intervals to use the latest recall outcome, so an older mistake does not keep a command due every day forever.
 - Added a record-by-record import preview for sessions, commands, quizzes, scenarios, and missions, including duplicate IDs and projected totals.
+- Added a user-editable weekly practice-time goal based on recorded sessions.
+- Added Git and GitHub and AI Models and LLMs learning paths with 20 sourced CLI exercises and 14 quiz questions.
+- Added incident views to the network topology for DNS service failure and wrong VLAN assignment.
 - Added a safe virtual Linux directory and synthetic files to free terminal exploration.
 - Added five evidence-led troubleshooting missions with saved scores, including DHCP lease failure and incorrect VLAN assignment.
 - Added a version 2 to version 3 storage migration and import preview.

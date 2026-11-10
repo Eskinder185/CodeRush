@@ -11,6 +11,7 @@ import { formatDuration, languageProgress, overallStats, typingSessions, weekKey
 import { findConfusions, findWeaknesses, keyErrorRates } from '../lib/recommend'
 import { achievements } from '../lib/achievements'
 import { commandMastery } from '../lib/mastery'
+import { readWeeklyGoal, saveWeeklyGoal, weeklyPracticeMinutes, WEEKLY_GOALS, type WeeklyGoalMinutes } from '../lib/weekly'
 import { languageTracks } from '../content/code'
 import { commands, getCommand } from '../content/commands'
 import { CATEGORY_LABEL, PLATFORM_LABEL, type CommandCategory } from '../content/types'
@@ -110,6 +111,8 @@ export default function Progress() {
   const typed = typingSessions(data)
   const [kindFilter, setKindFilter] = useState<'all' | PracticeSession['kind']>('all')
   const [page, setPage] = useState(0)
+  const [weeklyGoal, setWeeklyGoal] = useState(readWeeklyGoal)
+  const weekMinutes = weeklyPracticeMinutes(data)
 
   const wpmSeries: Point[] = useMemo(() => typed.slice(-30).map((s) => ({ label: shortDate(s.completedAt), value: s.wpm })), [typed])
   const accSeries: Point[] = useMemo(() => typed.slice(-30).map((s) => ({ label: shortDate(s.completedAt), value: Math.round(s.accuracy) })), [typed])
@@ -158,6 +161,19 @@ export default function Progress() {
         <Stat label="Commands practiced" value={Object.keys(data.commands).length} hint={`${Object.values(data.commands).filter((p) => commandMastery(p).level === 'mastered').length} mastered`} />
         <Stat label="Missions completed" value={Object.keys(data.missions).length} />
         <Stat label="Best mission score" value={Math.max(0, ...Object.values(data.missions).map((m) => m.bestScore))} hint="Out of 100" />
+      </section>
+
+      <section className="panel panel-pad mt-5" aria-labelledby="weekly-goal-h">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div><h2 id="weekly-goal-h" className="text-h3">This week’s practice goal</h2><p className="mt-1 text-sm text-fg-muted">{weekMinutes} of {weeklyGoal} minutes recorded this week. Your completed practice remains in your history even if you miss a week.</p></div>
+          <label className="text-sm text-fg-muted">Weekly goal
+            <select className="ml-2 rounded border border-line bg-surface px-3 py-2 text-fg" value={weeklyGoal} onChange={(e) => { const next = Number(e.target.value) as WeeklyGoalMinutes; if (saveWeeklyGoal(next)) setWeeklyGoal(next) }}>
+              {WEEKLY_GOALS.map((minutes) => <option key={minutes} value={minutes}>{minutes} minutes</option>)}
+            </select>
+          </label>
+        </div>
+        <div className="mt-4"><ProgressBar value={Math.min(100, Math.round(weekMinutes / weeklyGoal * 100))} label="Weekly practice goal progress" tone={weekMinutes >= weeklyGoal ? 'ok' : undefined} /></div>
+        {weekMinutes >= weeklyGoal && <p className="mt-2 text-sm text-ok" role="status">Goal reached this week.</p>}
       </section>
 
       {empty && (

@@ -9,6 +9,8 @@ export const GOALS = [
   { id: 'cloud', label: 'Cloud & DevOps', path: 'linux-networking' },
   { id: 'linux', label: 'Linux Administration', path: 'linux' },
   { id: 'typing', label: 'Improve Technical Typing', path: 'programming' },
+  { id: 'github', label: 'Git and GitHub', path: 'git-github' },
+  { id: 'ai', label: 'AI Models and LLMs', path: 'ai-models' },
 ] as const
 
 export const LEVELS = ['Complete beginner', 'Some experience', 'Intermediate', 'Advanced'] as const

@@ -10,7 +10,7 @@ CodeRush is a free, browser-based practice platform for people who work with cod
 
 ## CodeRush 3 development branch
 
-This branch adds optional three-question onboarding, five career journeys that reuse existing paths, a goal-based Today plan, due command review, five synthetic troubleshooting missions, stateful Linux file navigation in the terminal, and saved mission scores. Module completion still accepts a 50% quiz result; mastery now also requires at least 80% on the quiz when one exists. See [features](docs/CODERUSH_3_FEATURES.md), [architecture](docs/CODERUSH_3_ARCHITECTURE.md), and [test results](docs/CODERUSH_3_TEST_RESULTS.md).
+This branch adds optional three-question onboarding, five career journeys, a goal-based Today plan, due command review, five synthetic troubleshooting missions, Git and GitHub plus AI model learning paths, stateful Linux file navigation in the terminal, and saved mission scores. Module completion still accepts a 50% quiz result; mastery now also requires at least 80% on the quiz when one exists. See [features](docs/CODERUSH_3_FEATURES.md), [architecture](docs/CODERUSH_3_ARCHITECTURE.md), and [test results](docs/CODERUSH_3_TEST_RESULTS.md).
 
 Live site: <https://eskinder185.github.io/CodeRush/>
 
@@ -21,12 +21,12 @@ These counts come from the content files and are enforced by `src/content/conten
 | Content | Count |
 | --- | --- |
 | Programming typing lessons, preserved from 1.x | 45, in 9 languages |
-| Command exercises | 242: Linux 119, PowerShell 89, Windows CMD 17, Cisco IOS 17 |
+| Command exercises | 262: Linux and cross-platform CLI 139, PowerShell 89, Windows CMD 17, Cisco IOS 17 |
 | Troubleshooting scenarios | 32: Linux 8, PowerShell 8, networking 6, Cisco 4, security 6 |
-| Learning paths | 8, with 113 modules |
-| Quiz questions | 210 |
+| Learning paths | 10, with 120 modules |
+| Quiz questions | 224 |
 
-Learning paths: Programming Syntax (9 modules), Linux Command Line (13), Windows PowerShell (27), Networking Fundamentals (24), Defensive Cybersecurity (19), Linux Networking (10), Linux Security (6), and Cisco IOS Essentials (5).
+Learning paths: Programming Syntax (9 modules), Linux Command Line (13), Windows PowerShell (27), Networking Fundamentals (24), Defensive Cybersecurity (19), Linux Networking (10), Linux Security (6), Cisco IOS Essentials (5), Git and GitHub (4), and AI Models and LLMs (3).
 
 ## Features
 

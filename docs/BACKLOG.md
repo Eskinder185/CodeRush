@@ -2,9 +2,8 @@
 
 ## CodeRush 3 remaining work
 
-- Full independent syntax and output review of all 242 command exercises against current official documentation.
-- Add mission-specific topology changes and richer packet-flow explanations.
-- Add a user-editable weekly goal and deeper review history. Current daily minutes are saved through onboarding.
+- Full independent syntax and output review of all 262 command exercises against current official documentation.
+- Add deeper review history. A weekly practice-time goal is now editable on Progress; daily minutes remain saved through onboarding.
 - Investigate the pre-existing React maximum update-depth warning in a typing UI test.
 - Measure Lighthouse and Web Vitals on a deployed production build. Add Firefox, WebKit, and manual screen-reader testing.
 - Decide how the remote React `main` branch and the separate unpushed local `main` project should coexist before synchronizing that worktree.
@@ -13,7 +12,7 @@ Items from the CodeRush 2.0 specification that are deferred or only partly deliv
 
 ## Deferred
 
-- **Independent technical review of command content.** All 242 commands are marked `author-checked`: written against the linked documentation but not reviewed by a second person or run on real systems. Outputs are curated illustrations.
+- **Independent technical review of command content.** All 262 commands are marked `author-checked`: written against the linked documentation but not reviewed by a second person or run on real systems. Outputs are curated illustrations.
 - **Cloud sync and accounts.** Out of scope for a static site. Export and import cover moving data for now.
 - **Leaderboards.** Deferred as the spec suggests. They need comparable scoring, anti-cheat, and privacy controls.
 - **Lighthouse measurement.** Not run in this pass. Bundle splitting is in place (the shell is about 16 kB gzipped), but no performance score is claimed.

@@ -20,6 +20,8 @@ export interface TermState {
   /** Index into history while browsing with arrow keys; null when not browsing. */
   cursor: number | null
   nextId: number
+  /** Virtual working directory. This is never an operating-system path. */
+  cwd: string
 }
 
 export const PROMPTS: Record<Platform, string> = {
@@ -39,7 +41,59 @@ export const SHELL_OF: Record<Platform, Shell> = {
 export const SIM_BANNER = 'CodeRush simulated terminal. Commands are matched against lessons and never executed.'
 
 export function createTerm(banner = SIM_BANNER): TermState {
-  return { lines: [{ id: 0, kind: 'info', text: banner }], history: [], cursor: null, nextId: 1 }
+  return { lines: [{ id: 0, kind: 'info', text: banner }], history: [], cursor: null, nextId: 1, cwd: '/home/student' }
+}
+
+/** A small, fixed learning environment. Learner input is never passed to a shell. */
+const FILES: Record<string, Record<string, string | null>> = {
+  '/': { home: null, var: null, etc: null },
+  '/home': { student: null },
+  '/home/student': { 'notes.txt': 'Welcome to the CodeRush practice host. Try cd /var/log and cat syslog.', projects: null },
+  '/home/student/projects': { 'README.md': 'A sample project directory for navigation practice.' },
+  '/var': { log: null },
+  '/var/log': { syslog: 'Nov 09 09:14:02 lab-host systemd: Started SSH service.\nNov 09 09:16:44 lab-host dns: resolver timed out for example.test', 'auth.log': 'Nov 09 09:18:21 lab-host sshd: Failed password for invalid user guest from 192.0.2.45' },
+  '/etc': { hosts: '127.0.0.1 localhost\n192.0.2.10 lab-host', resolv: null },
+  '/etc/resolv': { 'resolv.conf': 'nameserver 192.0.2.53' },
+}
+
+function virtualPath(cwd: string, target: string): string {
+  const parts = (target.startsWith('/') ? [] : cwd.split('/').filter(Boolean))
+  for (const part of target.split('/')) {
+    if (!part || part === '.') continue
+    if (part === '..') parts.pop()
+    else parts.push(part)
+  }
+  return '/' + parts.join('/')
+}
+
+function simulateFiles(state: TermState, input: string, platform: Platform): TermState | null {
+  if (platform !== 'linux') return null
+  const match = /^(pwd|cd|ls|cat)(?:\s+(.+))?$/.exec(input.trim())
+  if (!match) return null
+  const [, command, arg] = match
+  if (command === 'pwd') return push(state, { kind: 'output', text: state.cwd })
+  if (command === 'cd') {
+    const next = virtualPath(state.cwd, arg?.trim() || '/home/student')
+    if (!FILES[next]) return push(state, { kind: 'error', text: `cd: ${arg}: no such simulated directory` })
+    return push({ ...state, cwd: next }, { kind: 'info', text: `Working directory: ${next}` })
+  }
+  if (command === 'ls') {
+    const target = virtualPath(state.cwd, arg?.trim() || '.')
+    const entries = FILES[target]
+    if (!entries) return push(state, { kind: 'error', text: `ls: ${arg}: no such simulated directory` })
+    return push(state, { kind: 'output', text: Object.keys(entries).join('  ') || '(empty directory)' })
+  }
+  if (command === 'cat') {
+    if (!arg) return push(state, { kind: 'error', text: 'cat: choose a file in this simulated environment' })
+    const target = virtualPath(state.cwd, arg.trim())
+    const name = target.split('/').pop()!
+    const parent = target.slice(0, -name.length).replace(/\/$/, '') || '/'
+    const file = FILES[parent]?.[name]
+    if (file === null) return push(state, { kind: 'error', text: `cat: ${arg}: is a directory` })
+    if (file === undefined) return push(state, { kind: 'error', text: `cat: ${arg}: no such simulated file` })
+    return push(state, { kind: 'output', text: file })
+  }
+  return null
 }
 
 export function push(state: TermState, ...lines: Omit<TermLine, 'id'>[]): TermState {
@@ -80,6 +134,7 @@ export function runBuiltin(state: TermState, input: string, platform: Platform):
         text: [
           'This is a practice simulation, not a real shell.',
           'Type a command from the lesson to see curated sample output.',
+          platform === 'linux' ? 'Navigation is stateful: try pwd, ls, cd /var/log, then cat syslog.' : '',
           'Arrow Up and Arrow Down browse your history. "clear" empties the screen.',
           platform === 'cisco-ios' ? 'IOS abbreviations such as "sh ip int br" are accepted.' : '',
         ]
@@ -100,6 +155,8 @@ export function runBuiltin(state: TermState, input: string, platform: Platform):
 /** Free exploration: print stored output for any library command on this platform. */
 export function runFree(state: TermState, input: string, platform: Platform, library: CommandExercise[]): { state: TermState; match?: CommandExercise } {
   if (!input.trim()) return { state }
+  const simulated = simulateFiles(state, input, platform)
+  if (simulated) return { state: simulated, match: identify(input, library, SHELL_OF[platform]) }
   const shell = SHELL_OF[platform]
   const match = identify(input, library, shell)
   if (match) {

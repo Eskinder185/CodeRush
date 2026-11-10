@@ -2,9 +2,10 @@ import type { StatPair } from '../typing/engine'
 import type { MistakeCategory } from '../typing/categories'
 
 /** Bump when AppData changes shape, and add a step to migrate.ts. */
-export const SCHEMA_VERSION = 2 as const
+export const SCHEMA_VERSION = 3 as const
 
-export const STORAGE_KEY = 'coderush:data:v2'
+export const STORAGE_KEY = 'coderush:data:v3'
+export const PREVIOUS_KEY = 'coderush:data:v2'
 /** Version 1 key, written by CodeRush 1.x. It is read for migration and never deleted. */
 export const LEGACY_KEY = 'coderush_user_stats'
 export const SETTINGS_KEY = 'coderush:settings'
@@ -83,6 +84,12 @@ export interface DailyResult {
   completedAt: string
 }
 
+export interface MissionResult {
+  attempts: number
+  bestScore: number // 0..100, investigation quality
+  completedAt: string
+}
+
 export interface Confusion {
   expected: string
   got: string
@@ -95,6 +102,7 @@ export interface AppData {
   commands: Record<string, CommandProgress>
   quizzes: Record<string, QuizResult>
   scenarios: Record<string, ScenarioResult>
+  missions: Record<string, MissionResult>
   daily: Record<string, DailyResult>
   confusions: Confusion[]
   favorites: string[]
@@ -112,6 +120,7 @@ export function emptyData(): AppData {
     commands: {},
     quizzes: {},
     scenarios: {},
+    missions: {},
     daily: {},
     confusions: [],
     favorites: [],

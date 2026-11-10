@@ -116,7 +116,7 @@ export interface ValidationReport {
   rejected: number
 }
 
-/** Validate a version 2 AppData object, dropping anything malformed. */
+/** Validate a version 2 or 3 AppData object, dropping anything malformed. */
 export function validateAppData(raw: unknown): ValidationReport {
   const data = emptyData()
   let rejected = 0
@@ -152,6 +152,11 @@ export function validateAppData(raw: unknown): ValidationReport {
           bestFirstTry: Math.min(1, Math.max(0, v.bestFirstTry)),
           ...(validDate(v.completedAt) ? { completedAt: v.completedAt } : {}),
         }
+      : null
+  )
+  data.missions = filterRecord(raw.missions, (v) =>
+    num(v.attempts) && v.attempts >= 0 && num(v.bestScore) && validDate(v.completedAt)
+      ? { attempts: v.attempts, bestScore: clampPct(v.bestScore), completedAt: v.completedAt }
       : null
   )
   data.daily = filterRecord(raw.daily, (v) =>
@@ -192,7 +197,7 @@ export function dedupe(sessions: PracticeSession[]): PracticeSession[] {
   return out.sort((a, b) => a.completedAt.localeCompare(b.completedAt))
 }
 
-export type ImportFormat = 'v2' | 'v1-export' | 'v1-array'
+export type ImportFormat = 'v3' | 'v2' | 'v1-export' | 'v1-array'
 
 export interface ImportResult {
   ok: boolean
@@ -205,7 +210,7 @@ export interface ImportResult {
 
 /**
  * Parse an import file. Accepts:
- * - CodeRush 2 exports: { app: "CodeRush", schemaVersion: 2, data: AppData }
+ * - CodeRush 3 and 2 exports: { app: "CodeRush", schemaVersion: 3 or 2, data: AppData }
  * - CodeRush 1 exports: { exportVersion: 1, sessions: [...] }
  * - CodeRush 1 raw localStorage arrays: [ { language, lessonId, ... } ]
  */
@@ -218,9 +223,9 @@ export function parseImport(text: string): ImportResult {
   }
   if (Array.isArray(parsed)) return fromLegacyRows(parsed, 'v1-array')
   if (!isObj(parsed)) return { ok: false, accepted: 0, rejected: 0, error: 'The file does not contain CodeRush data.' }
-  if (parsed.app === 'CodeRush' && parsed.schemaVersion === SCHEMA_VERSION && isObj(parsed.data)) {
+  if (parsed.app === 'CodeRush' && (parsed.schemaVersion === SCHEMA_VERSION || parsed.schemaVersion === 2) && isObj(parsed.data)) {
     const r = validateAppData(parsed.data)
-    return { ok: true, format: 'v2', data: r.data, accepted: r.accepted, rejected: r.rejected }
+    return { ok: true, format: parsed.schemaVersion === 2 ? 'v2' : 'v3', data: r.data, accepted: r.accepted, rejected: r.rejected }
   }
   if (num(parsed.schemaVersion) && parsed.schemaVersion > SCHEMA_VERSION) {
     return { ok: false, accepted: 0, rejected: 0, error: 'This file was exported by a newer version of CodeRush.' }
@@ -271,6 +276,10 @@ export function mergeData(base: AppData, add: AppData): AppData {
       ? { ...cur, completed: cur.completed || s.completed, bestFirstTry: Math.max(cur.bestFirstTry, s.bestFirstTry) }
       : s
   }
+  for (const [id, m] of Object.entries(add.missions)) {
+    const cur = out.missions[id]
+    out.missions[id] = cur ? { attempts: Math.max(cur.attempts, m.attempts), bestScore: Math.max(cur.bestScore, m.bestScore), completedAt: cur.completedAt > m.completedAt ? cur.completedAt : m.completedAt } : m
+  }
   for (const [d, r] of Object.entries(add.daily)) {
     const cur = out.daily[d]
     if (!cur || r.score > cur.score) out.daily[d] = r
@@ -289,16 +298,18 @@ function structuredCloneSafe<T>(v: T): T {
 }
 
 /**
- * Load from raw localStorage strings. Version 2 wins when present.
- * Otherwise version 1 rows are migrated. The version 1 key is left in place as a backup.
+ * Load from raw localStorage strings. Version 3 wins; v2 and v1 remain readable backups.
  */
-export function loadFromStrings(v2: string | null, v1: string | null, now = new Date()): { data: AppData; migrated: boolean } {
-  if (v2) {
+export function loadFromStrings(v3: string | null, v2: string | null, v1: string | null, now = new Date()): { data: AppData; migrated: boolean } {
+  if (v3) {
     try {
-      return { data: validateAppData(JSON.parse(v2)).data, migrated: false }
+      return { data: validateAppData(JSON.parse(v3)).data, migrated: false }
     } catch {
-      // Corrupt v2 data falls through to v1 so a learner never loses older progress.
+      // Fall through to preserved older data.
     }
+  }
+  if (v2) {
+    try { return { data: validateAppData(JSON.parse(v2)).data, migrated: true } } catch { /* fall through */ }
   }
   if (v1) {
     try {

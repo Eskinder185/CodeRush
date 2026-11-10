@@ -6,6 +6,7 @@ import { LineChart, BarChart, type Point } from '../components/charts/Charts'
 import { VirtualKeyboard } from '../components/typing/VirtualKeyboard'
 import { usePageMeta } from '../app/context'
 import { clearAllData, downloadExport, importText, useAppData } from '../lib/storage/store'
+import { parseImport, type ImportResult } from '../lib/storage/migrate'
 import { formatDuration, languageProgress, overallStats, typingSessions, weekKey } from '../lib/progress'
 import { findConfusions, findWeaknesses, keyErrorRates } from '../lib/recommend'
 import { achievements } from '../lib/achievements'
@@ -25,9 +26,12 @@ function shortDate(iso: string) {
 
 function DataManagement() {
   const toast = useToast()
+  const data = useAppData()
   const fileRef = useRef<HTMLInputElement>(null)
   const [mode, setMode] = useState<'merge' | 'replace'>('merge')
   const [confirm, setConfirm] = useState(false)
+  const [preview, setPreview] = useState<{ text: string; result: ImportResult } | null>(null)
+  const duplicates = preview?.result.data?.sessions.filter((s) => data.sessions.some((cur) => cur.id === s.id)).length ?? 0
   return (
     <section className="panel panel-pad" aria-labelledby="data-h">
       <h2 id="data-h" className="text-h3">Your data</h2>
@@ -56,16 +60,20 @@ function DataManagement() {
             e.target.value = ''
             if (!f) return
             if (f.size > 5_000_000) return toast('That file is larger than 5 MB, which is too big for a CodeRush export.', 'warn')
-            const r = importText(await f.text(), mode)
-            if (!r.ok) toast(r.error ?? 'Import failed.', 'warn')
-            else toast(`Imported ${r.accepted} session${r.accepted === 1 ? '' : 's'}${r.rejected ? `, skipped ${r.rejected} invalid record${r.rejected === 1 ? '' : 's'}` : ''}.`, 'success')
+            const text = await f.text()
+            const result = parseImport(text)
+            if (!result.ok) toast(result.error ?? 'Import failed.', 'warn')
+            else setPreview({ text, result })
           }}
         />
         <Button variant="danger" onClick={() => setConfirm(true)}>
           <Trash2 className="h-4 w-4" aria-hidden /> Clear all progress
         </Button>
       </div>
-      <p className="mt-3 text-xs text-fg-subtle">Accepts CodeRush 2 exports and files exported by CodeRush 1.x.</p>
+      <p className="mt-3 text-xs text-fg-subtle">Accepts CodeRush 3 and 2 exports and files exported by CodeRush 1.x.</p>
+      <Dialog open={!!preview} onClose={() => setPreview(null)} title="Review import">
+        {preview && <><p className="text-sm text-fg-muted">Format: {preview.result.format}. {preview.result.accepted} valid session{preview.result.accepted === 1 ? '' : 's'}; {preview.result.rejected} invalid record{preview.result.rejected === 1 ? '' : 's'} skipped. {duplicates} session{duplicates === 1 ? '' : 's'} already in this browser.</p><p className="mt-3 text-sm text-fg-muted">{mode === 'merge' ? 'Merge keeps current progress and deduplicates sessions by ID.' : 'Replace removes current progress and uses only the imported data.'}</p><div className="mt-5 flex flex-wrap justify-end gap-2"><Button variant="secondary" onClick={() => setPreview(null)}>Cancel</Button><Button onClick={() => { const r = importText(preview.text, mode); setPreview(null); if (r.ok) toast(`Imported ${r.accepted} valid sessions.`, 'success'); else toast(r.error ?? 'Import failed.', 'warn') }}>Confirm {mode}</Button></div></>}
+      </Dialog>
       <Dialog open={confirm} onClose={() => setConfirm(false)} title="Clear all progress?">
         <p className="text-sm text-fg-muted">This deletes every session, mastery score, quiz result, and daily challenge in this browser. It cannot be undone. Export first if you might want it back.</p>
         <div className="mt-5 flex justify-end gap-2">
@@ -120,7 +128,7 @@ export default function Progress() {
   const history = [...data.sessions].reverse().filter((s) => kindFilter === 'all' || s.kind === kindFilter)
   const PAGE = 15
   const pageRows = history.slice(page * PAGE, page * PAGE + PAGE)
-  const empty = data.sessions.length === 0
+  const empty = data.sessions.length === 0 && Object.keys(data.missions).length === 0
 
   return (
     <div className="page">
@@ -132,13 +140,15 @@ export default function Progress() {
         </p>
       )}
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6" aria-label="Overview">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Overview">
         <Stat label="Lessons passed" value={stats.lessonsPassed} hint="Exact matches only" />
         <Stat label="Average WPM" value={stats.averageWpm} hint={`${typed.length} typing sessions`} />
         <Stat label="Best WPM" value={stats.bestWpm} />
         <Stat label="Average accuracy" value={`${stats.averageAccuracy}%`} />
         <Stat label="Practice time" value={formatDuration(stats.timeSec)} />
         <Stat label="Commands practiced" value={Object.keys(data.commands).length} hint={`${Object.values(data.commands).filter((p) => commandMastery(p).level === 'mastered').length} mastered`} />
+        <Stat label="Missions completed" value={Object.keys(data.missions).length} />
+        <Stat label="Best mission score" value={Math.max(0, ...Object.values(data.missions).map((m) => m.bestScore))} hint="Out of 100" />
       </section>
 
       {empty && (
@@ -316,7 +326,11 @@ export default function Progress() {
         {history.length === 0 ? (
           <p className="mt-4 text-sm text-fg-subtle">No attempts recorded.</p>
         ) : (
-          <div className="mt-4 overflow-x-auto rounded-lg border border-line" tabIndex={0} aria-label="Learning history table">
+          <>
+          <ul className="mt-4 space-y-2 md:hidden" aria-label="Learning history">
+            {pageRows.map((s) => <li key={s.id} className="panel p-3 text-sm"><div className="flex justify-between gap-2"><span className="font-medium">{KIND_LABEL[s.kind]}</span><span className="text-xs text-fg-subtle">{new Date(s.completedAt).toLocaleDateString()}</span></div><p className="mt-1 break-words text-fg-muted">{s.title ?? getCommand(s.itemId)?.title ?? s.itemId}</p><p className="mt-2 text-xs text-fg-subtle">{s.wpm} WPM · {s.accuracy}% accuracy · {formatDuration(s.durationSec)}</p></li>)}
+          </ul>
+          <div className="mt-4 hidden overflow-x-auto rounded-lg border border-line md:block" tabIndex={0} aria-label="Learning history table">
             <table className="w-full min-w-[44rem] text-sm">
               <thead className="bg-elevated text-left text-xs text-fg-subtle">
                 <tr>
@@ -347,6 +361,7 @@ export default function Progress() {
               </tbody>
             </table>
           </div>
+          </>
         )}
         {history.length > PAGE && (
           <div className="mt-3 flex items-center gap-2 text-sm">

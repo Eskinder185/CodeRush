@@ -103,7 +103,7 @@ export function getAIPracticeById(id: string): AIPractice | undefined {
  */
 function updateStoredAIPractices(practices: AIPractice[]): void {
   const data = getData()
-  data.aiPractices = practices.slice(-LIMITS.aiPractices)
+  data.aiPractices = practices.slice(0, LIMITS.aiPractices)
   try {
     localStorage.setItem('coderush:data:v3', JSON.stringify(data))
   } catch (err) {
